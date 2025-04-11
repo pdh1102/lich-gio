@@ -12,15 +12,18 @@
   <meta property="og:url" content="https://pdh1102.github.io/lich-gio/" />
   <meta property="og:image" content="https://pdh1102.github.io/lich-gio/og-image.jpg" />
   <link rel="icon" type="image/png" href="favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Lịch giỗ tộc họ</title>
   <style>
     :root {
-      --primary-color: #b68d4c;
-      --secondary-color: #964b00;
-      --bg-color: #f9f5e3;
-      --text-color: #1a1a1a;
-      --border-color: #e5c687;
-      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --primary-color: #34495e;
+      --secondary-color: #2c3e50;
+      --accent-color: #e67e22;
+      --bg-color: #f5f6fa;
+      --text-color: #2c3e50;
+      --border-color: #dcdde1;
+      --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --gradient: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
     }
 
     * {
@@ -31,204 +34,241 @@
 
     body {
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
+      font-family: 'Be Vietnam Pro', sans-serif;
       background: var(--bg-color);
       color: var(--text-color);
       line-height: 1.6;
     }
 
     header {
-      background-color: var(--primary-color);
+      background: var(--gradient);
       color: #fff;
-      padding: 2rem 1rem;
+      padding: 3rem 1rem;
       text-align: center;
       box-shadow: var(--box-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+      background-size: cover;
+      opacity: 0.1;
     }
 
     header h1 {
       margin: 0;
-      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
       font-weight: 700;
-    }
-
-    header p {
-      font-size: clamp(0.9rem, 2vw, 1.1rem);
-      color: #fcecc8;
-      margin-top: 0.5rem;
+      letter-spacing: -0.5px;
+      position: relative;
     }
 
     main {
-      max-width: min(960px, 95%);
-      margin: 2rem auto;
-      background-color: #fff9e8;
-      padding: clamp(1rem, 3vw, 2rem);
-      border-radius: 16px;
-      box-shadow: var(--box-shadow);
+      max-width: min(1200px, 95%);
+      margin: -2rem auto 2rem;
+      position: relative;
+      z-index: 1;
     }
 
     .table-container {
-      overflow-x: auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
       margin-bottom: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      font-size: clamp(0.9rem, 2vw, 1rem);
       background: #fff;
     }
 
     th, td {
-      border-bottom: 1px solid var(--border-color);
-      padding: 1rem;
+      padding: 1.2rem;
       text-align: left;
+      border-bottom: 1px solid var(--border-color);
     }
 
     th {
-      background-color: #f1d9a7;
+      background: var(--primary-color);
+      color: #fff;
       font-weight: 600;
-      position: sticky;
-      top: 0;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     tr:hover {
-      background-color: #fff3d1;
+      background-color: #f8f9fa;
     }
 
     .countdown-box {
-      margin-top: 2rem;
-      background: #fff3d1;
-      padding: clamp(1rem, 3vw, 1.5rem);
-      border: 2px dashed #d4a243;
-      border-radius: 12px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
     }
 
     .countdown-section {
       background: #fff;
-      border-radius: 10px;
-      padding: 1.5rem;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--box-shadow);
+      transition: transform 0.2s ease;
     }
 
-    .countdown-section h2 {
-      font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-      color: var(--secondary-color);
-      margin-bottom: 1rem;
+    .countdown-section:hover {
+      transform: translateY(-5px);
     }
 
     .countdown {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
       gap: 1rem;
+      margin-top: 1rem;
     }
 
     .countdown-item {
-      background: #fff;
-      padding: 0.8rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      min-width: 80px;
+      background: var(--bg-color);
+      padding: 1rem;
+      border-radius: 12px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .countdown-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent-color);
+      opacity: 0.5;
     }
 
     .countdown-value {
       display: block;
-      font-size: clamp(1.3rem, 3vw, 1.8rem);
-      font-weight: bold;
-      color: var(--secondary-color);
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 700;
+      color: var(--accent-color);
+      line-height: 1.2;
+      margin-bottom: 0.3rem;
     }
 
     .countdown-label {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #666;
-      margin-top: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .event-info {
-      font-size: clamp(1rem, 2vw, 1.1rem);
-      color: #333;
-      text-align: left;
+      padding: 1rem;
+      border-radius: 12px;
+      background: var(--bg-color);
     }
 
     .event-info span {
       display: block;
-      margin-bottom: 0.8rem;
-      line-height: 1.5;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
     .event-info strong {
-      color: var(--secondary-color);
+      color: var(--accent-color);
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     footer {
       text-align: center;
-      padding: 1.5rem;
+      padding: 2rem;
+      color: #666;
       font-size: 0.9rem;
-      color: #7a6240;
-      margin-top: 2rem;
     }
 
-    @media (max-width: 600px) {
+    footer a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        margin-top: -1rem;
+      }
+
       .countdown-box {
+        gap: 1rem;
+      }
+
+      .countdown-section {
+        padding: 1.5rem;
+      }
+
+      th {
+        font-size: 0.8rem;
+      }
+
+      td {
         padding: 1rem;
-      }
-
-      .countdown-item {
-        min-width: 60px;
-        padding: 0.6rem;
-      }
-
-      td:last-child {
-        text-align: right;
       }
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-color: #1a1a1a;
-        --text-color: #f9f5e3;
+        --bg-color: #1a1b1e;
+        --text-color: #e4e6eb;
+        --border-color: #2c2e33;
       }
 
       body {
         color: var(--text-color);
       }
 
-      main {
-        background-color: #2d2d2d;
-      }
-
+      .table-container,
+      .countdown-section,
       table {
-        background: #333;
-      }
-
-      th {
-        background-color: #4a4a4a;
+        background: #25262b;
       }
 
       tr:hover {
-        background-color: #3d3d3d;
+        background: #2c2e33;
       }
 
-      .countdown-section, .countdown-item {
-        background: #3d3d3d;
+      .countdown-item {
+        background: #2c2e33;
+      }
+
+      .event-info span {
+        background: #25262b;
       }
 
       .event-info {
-        color: #f0f0f0;
+        background: #2c2e33;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>NGÀY GIỖ NHỮNG NGƯỜI ĐÃ MẤT</h1>
-    <p>Danh sách được tính theo ngày âm lịch</p>
+    <h1>LỊCH GIỖ GIA ĐÌNH</h1>
   </header>
   <main>
     <div class="table-container">
@@ -254,7 +294,6 @@
     </div>
     <div class="countdown-box">
       <div class="countdown-section">
-        <h2>Đếm ngược đến ngày giỗ gần nhất</h2>
         <div class="countdown" id="countdown">
           <div class="countdown-item">
             <span class="countdown-value">--</span>
@@ -275,7 +314,6 @@
         </div>
       </div>
       <div class="countdown-section">
-        <h2>Thông tin ngày giỗ</h2>
         <div class="event-info" id="eventInfo">
           <span id="eventName"></span>
           <span id="eventDates"></span>
