@@ -283,7 +283,7 @@
         <tbody>
           <tr><td>Phạm Văn Nhu</td><td>Cụ nội</td><td>08/04</td></tr>
           <tr><td>Lê Thị Nguyệt</td><td>Cụ bà cả</td><td>13/04</td></tr>
-          <tr><td>Nguyễn Hữu Ngân</td><td>Bố vợ</td><td>14/05</td></tr>
+          <tr><td>Nguyễn Hữu Ngần</td><td>Bố vợ</td><td>14/05</td></tr>
           <tr><td>Phạm Văn Tiêm</td><td>Kỵ nội</td><td>01/08</td></tr>
           <tr><td>Lê Thị Sửu</td><td>Kỵ bà</td><td>23/09</td></tr>
           <tr><td>Lê Thị Viễn</td><td>Cụ bà hai</td><td>01/10</td></tr>
@@ -325,17 +325,18 @@
   <footer>
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
+  <script src="https://cdn.jsdelivr.net/npm/amlich@2.2.3/amlich.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const gioList = [
-        { name: "Phạm Văn Nhu", date: "08/04", note: "con cụ Phạm Văn Tiêm" },
+        { name: "Phạm Văn Nhu", date: "08/04", note: "Cha cụ Phạm Văn Tiêm" },
         { name: "Lê Thị Nguyệt", date: "13/04", note: "Vợ cụ Phạm Văn Nhu" },
-        { name: "Nguyễn Hữu Ngân", date: "14/05", note: "Bố vợ" },
-        { name: "Phạm Văn Tiêm", date: "01/08", note: "cha cụ Phạm Văn Nhu" },
-        { name: "Lê Thị Sửu", date: "23/09", note: "Vợ kỵ Phạm Văn Tiêm" },
-        { name: "Lê Thị Viễn", date: "01/10", note: "Vợ hai Phạm Văn Nhu" },
-        { name: "Phạm Văn Hợi", date: "27/10", note: "Con của cụ Phạm Văn Nhu" },
-        { name: "Vũ Thị Lơ", date: "15/12", note: "Vợ ông Phạm Văn Hợi" }
+        { name: "Nguyễn Hữu Ngân", date: "14/05", note: "" },
+        { name: "Phạm Văn Tiêm", date: "01/08", note: "Con cụ Phạm Văn Nhu" },
+        { name: "Lê Thị Sửu", date: "23/09", note: "Vợ kỵ Tiêm" },
+        { name: "Lê Thị Viễn", date: "01/10", note: "Vợ kế cụ Nhu" },
+        { name: "Phạm Văn Hợi", date: "27/10", note: "Con của kỵ Tiêm" },
+        { name: "Vũ Thị Lơ", date: "15/12", note: "Vợ ông Hợi" }
       ];
 
       function formatDate(date) {
@@ -348,105 +349,89 @@
         return date.toLocaleDateString('vi-VN', options);
       }
 
-      async function lunarToSolar(lunarStr, year) {
-        const [day, month] = lunarStr.split("/").map(Number);
-        try {
-          const response = await fetch(`https://api.hocmai.vn/calendar/convert?lunar_day=${day}&lunar_month=${month}&lunar_year=${year}&timezone=7`);
-          const data = await response.json();
-          if (data.success) {
-            return new Date(data.data.solar_year, data.data.solar_month - 1, data.data.solar_day);
-          }
-          throw new Error('API conversion failed');
-        } catch (error) {
-          console.error('Error converting date:', error);
-          // Fallback to simple calculation if API fails
-          const lunarMonthAvg = 29.53;
-          const dayFromNewYear = (month - 1) * lunarMonthAvg + day;
-          return new Date(year, 0, Math.floor(dayFromNewYear));
-        }
+      function getLunarDate(solarDate) {
+        const jd = AL.convertToJuliusDay(solarDate);
+        return AL.convertToLunarDate(jd);
       }
 
-      async function getNextGio() {
+      function getSolarDate(lunarDay, lunarMonth, lunarYear) {
+        const jd = AL.convertToJuliusDay({
+          day: lunarDay,
+          month: lunarMonth,
+          year: lunarYear,
+          isLeap: false
+        });
+        return AL.convertToSolarDate(jd);
+      }
+
+      function getNextGio() {
         const now = new Date();
         const currentYear = now.getFullYear();
-        
-        try {
-          // Tính toán ngày dương của tất cả các ngày giỗ cho năm hiện tại và năm sau
-          const dates = await Promise.all(gioList.map(async (e) => {
-            const thisYearDate = await lunarToSolar(e.date, currentYear);
-            const nextYearDate = await lunarToSolar(e.date, currentYear + 1);
-            
-            // Thêm thông tin tháng và ngày âm lịch để dễ so sánh
-            const [lunarDay, lunarMonth] = e.date.split("/").map(Number);
-            return [
-              { 
-                ...e, 
-                dDate: thisYearDate,
-                lunarDay,
-                lunarMonth,
-                year: currentYear 
-              },
-              { 
-                ...e, 
-                dDate: nextYearDate,
-                lunarDay,
-                lunarMonth,
-                year: currentYear + 1
-              }
-            ];
-          }));
+        const allDates = [];
 
-          // Làm phẳng mảng và lọc ra các ngày trong tương lai
-          const allDates = dates.flat().filter(d => d.dDate > now);
-
-          // Sắp xếp theo thứ tự thời gian
-          const sortedDates = allDates.sort((a, b) => {
-            // So sánh năm trước
-            if (a.year !== b.year) return a.year - b.year;
-            // Nếu cùng năm, so sánh tháng âm lịch
-            if (a.lunarMonth !== b.lunarMonth) return a.lunarMonth - b.lunarMonth;
-            // Nếu cùng tháng, so sánh ngày âm lịch
-            return a.lunarDay - b.lunarDay;
-          });
+        gioList.forEach(gio => {
+          const [day, month] = gio.date.split("/").map(Number);
           
-          return sortedDates[0];
-        } catch (error) {
-          console.error('Error getting next date:', error);
-          return null;
-        }
-      }
-
-      async function updateCountdown() {
-        try {
-          const next = await getNextGio();
-          if (!next) {
-            document.getElementById("countdown").innerHTML = 'Không thể tải dữ liệu';
-            return;
+          // Thử với năm hiện tại
+          const thisYearSolar = getSolarDate(day, month, currentYear);
+          const thisYearDate = new Date(thisYearSolar.year, thisYearSolar.month - 1, thisYearSolar.day);
+          
+          if (thisYearDate > now) {
+            allDates.push({
+              ...gio,
+              dDate: thisYearDate,
+              lunarDay: day,
+              lunarMonth: month,
+              year: currentYear
+            });
           }
 
-          const now = new Date();
-          const diff = Math.floor((next.dDate - now) / 1000);
+          // Thử với năm sau
+          const nextYearSolar = getSolarDate(day, month, currentYear + 1);
+          const nextYearDate = new Date(nextYearSolar.year, nextYearSolar.month - 1, nextYearSolar.day);
           
-          const days = Math.floor(diff / 86400);
-          const hours = Math.floor((diff % 86400) / 3600);
-          const minutes = Math.floor((diff % 3600) / 60);
-          const seconds = diff % 60;
-
-          // Cập nhật đồng hồ đếm ngược
-          document.querySelectorAll('.countdown-value').forEach((el, i) => {
-            el.textContent = [days, hours, minutes, seconds][i];
+          allDates.push({
+            ...gio,
+            dDate: nextYearDate,
+            lunarDay: day,
+            lunarMonth: month,
+            year: currentYear + 1
           });
+        });
 
-          // Cập nhật thông tin ngày giỗ
-          document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
-          document.getElementById("eventDates").innerHTML = `
-            <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
-            <strong>Ngày âm:</strong> ${next.lunarDay}/${next.lunarMonth} (âm lịch)
-          `;
-          document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
-        } catch (error) {
-          console.error('Error updating countdown:', error);
+        return allDates.sort((a, b) => a.dDate - b.dDate)[0];
+      }
+
+      function updateCountdown() {
+        const next = getNextGio();
+        if (!next) {
+          document.getElementById("countdown").innerHTML = 'Không thể tải dữ liệu';
+          return;
         }
+
+        const now = new Date();
+        const diff = Math.floor((next.dDate - now) / 1000);
+        
+        const days = Math.floor(diff / 86400);
+        const hours = Math.floor((diff % 86400) / 3600);
+        const minutes = Math.floor((diff % 3600) / 60);
+        const seconds = diff % 60;
+
+        // Cập nhật đồng hồ đếm ngược
+        document.querySelectorAll('.countdown-value').forEach((el, i) => {
+          el.textContent = [days, hours, minutes, seconds][i];
+        });
+
+        // Lấy thông tin âm lịch của ngày giỗ
+        const lunarInfo = getLunarDate(next.dDate);
+        
+        // Cập nhật thông tin ngày giỗ
+        document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
+        document.getElementById("eventDates").innerHTML = `
+          <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
+          <strong>Ngày âm:</strong> Mùng ${next.lunarDay} tháng ${next.lunarMonth} năm ${lunarInfo.year} (âm lịch)
+        `;
+        document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
       }
 
       // Cập nhật ban đầu và mỗi giây
