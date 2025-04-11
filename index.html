@@ -105,6 +105,33 @@
         font-size: 1.1rem;
       }
     }
+    .countdown-item {
+      display: inline-block;
+      margin: 0 10px;
+      text-align: center;
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .countdown-value {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #964b00;
+    }
+    .countdown-label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .event-info span {
+      margin-bottom: 10px;
+      display: block;
+      line-height: 1.5;
+    }
+    .event-info strong {
+      color: #964b00;
+    }
   </style>
 </head>
 <body>
@@ -162,6 +189,16 @@
       { name: "Vũ Thị Lơ", date: "15/12", note: "Vợ ông Hợi" }
     ];
 
+    function formatDate(date) {
+      const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        weekday: 'long'
+      };
+      return date.toLocaleDateString('vi-VN', options);
+    }
+
     function lunarToSolar(lunarStr) {
       const [day, month] = lunarStr.split("/").map(Number);
       const today = new Date();
@@ -188,18 +225,43 @@
       const next = getNextGio();
       const now = new Date();
       const diff = Math.floor((next.dDate - now) / 1000);
+      
       const days = Math.floor(diff / 86400);
       const hours = Math.floor((diff % 86400) / 3600);
       const minutes = Math.floor((diff % 3600) / 60);
       const seconds = diff % 60;
-      document.getElementById("countdown").textContent =
-        `${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
-      document.getElementById("eventName").textContent = `Tên: ${next.name}`;
-      document.getElementById("eventDates").innerHTML =
-        `Ngày dương: ${next.dDate.toLocaleDateString()}<br>Ngày âm: ${next.date}`;
-      document.getElementById("eventNote").textContent = `Ghi chú: ${next.note || 'Không có'}`;
+
+      // Cập nhật đồng hồ đếm ngược với hiệu ứng
+      const countdownElement = document.getElementById("countdown");
+      countdownElement.innerHTML = `
+        <div class="countdown-item">
+          <span class="countdown-value">${days}</span>
+          <span class="countdown-label">ngày</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-value">${hours}</span>
+          <span class="countdown-label">giờ</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-value">${minutes}</span>
+          <span class="countdown-label">phút</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-value">${seconds}</span>
+          <span class="countdown-label">giây</span>
+        </div>
+      `;
+
+      // Cập nhật thông tin ngày giỗ
+      document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
+      document.getElementById("eventDates").innerHTML = `
+        <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
+        <strong>Ngày âm:</strong> ${next.date}
+      `;
+      document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
     }
 
+    // Cập nhật mỗi giây
     updateCountdown();
     setInterval(updateCountdown, 1000);
   </script>
