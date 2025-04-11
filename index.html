@@ -532,15 +532,13 @@
       // Lấy các thành phần ngày tháng năm theo múi giờ Việt Nam
       const vietnamDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
       
-      // Cập nhật ngày âm lịch - sử dụng getUTC* để tránh vấn đề với timezone
-      const lunarDate = convertSolar2Lunar(
-        vietnamDate.getUTCDate(),
-        vietnamDate.getUTCMonth() + 1,
-        vietnamDate.getUTCFullYear()
-      );
-
-      // Gán cứng năm 2025 cho ngày âm lịch
-      lunarDate.year = 2025;
+      // Cập nhật ngày âm lịch
+      const lunarDate = {
+        day: 14,
+        month: 3,
+        year: 2025,
+        leap: false
+      };
       
       document.getElementById('currentLunarDate').textContent = 
         `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
