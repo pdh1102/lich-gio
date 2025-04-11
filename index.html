@@ -163,38 +163,32 @@
       { name: "Vũ Thị Lơ", date: "15/12" },
     ];
 
-    async function getLunarToday() {
-      const today = new Date();
-      const res = await fetch(`https://api.vietlunar.com/convert?dd=${today.getDate()}&mm=${today.getMonth()+1}&yy=${today.getFullYear()}`);
-      const data = await res.json();
-      return data.lunar;
+    function lunarDateToSolar(year, lunarMonth, lunarDay) {
+      const lunar = require("viet-lunar-calendar");
+      const solar = lunar.convertLunar2Solar({ day: lunarDay, month: lunarMonth, year: year });
+      return new Date(solar.year, solar.month - 1, solar.day);
     }
 
-    async function lunarToSolar(dd, mm, yy) {
-      const res = await fetch(`https://api.vietlunar.com/convert?dd=${dd}&mm=${mm}&yy=${yy}&inlunar=true`);
-      const data = await res.json();
-      return new Date(data.solar.yy, data.solar.mm - 1, data.solar.dd);
-    }
-
-    async function getNextGioFromLunar() {
+    function getNextGio() {
       const today = new Date();
-      const lunarToday = await getLunarToday();
-      const lunarYear = lunarToday.yy;
+      const currentYear = today.getFullYear();
+      const events = [];
 
-      const allDates = await Promise.all(gioList.map(async entry => {
-        let d = entry.date.split("/").map(Number);
-        let solarDate = await lunarToSolar(d[0], d[1], lunarYear);
+      for (const entry of gioList) {
+        const [dd, mm] = entry.date.split("/").map(Number);
+        let solarDate = lunarDateToSolar(currentYear, mm, dd);
         if (solarDate < today) {
-          solarDate = await lunarToSolar(d[0], d[1], lunarYear + 1);
+          solarDate = lunarDateToSolar(currentYear + 1, mm, dd);
         }
-        return { ...entry, dDate: solarDate };
-      }));
+        events.push({ ...entry, dDate: solarDate });
+      }
 
-      return allDates.sort((a, b) => a.dDate - b.dDate)[0];
+      events.sort((a, b) => a.dDate - b.dDate);
+      return events[0];
     }
 
-    async function updateCountdown() {
-      const next = await getNextGioFromLunar();
+    function updateCountdown() {
+      const next = getNextGio();
       const now = new Date();
       const diff = Math.floor((next.dDate - now) / 1000);
       const days = Math.floor(diff / 86400);
@@ -205,13 +199,10 @@
       document.getElementById("countdown").textContent =
         `${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
 
-      const lunarRes = await fetch(`https://api.vietlunar.com/convert?dd=${next.dDate.getDate()}&mm=${next.dDate.getMonth()+1}&yy=${next.dDate.getFullYear()}`);
-      const lunar = await lunarRes.json();
-
       document.getElementById("eventName").textContent = `Tên: ${next.name}`;
       document.getElementById("eventDates").innerHTML =
         `Ngày dương: ${next.dDate.getDate().toString().padStart(2, '0')}/${(next.dDate.getMonth()+1).toString().padStart(2, '0')}/${next.dDate.getFullYear()}<br>` +
-        `Ngày âm: ${lunar.lunar.dd}/${lunar.lunar.mm}/${lunar.lunar.yy}`;
+        `Ngày âm: ${next.date}/${currentYear}`;
     }
 
     updateCountdown();
