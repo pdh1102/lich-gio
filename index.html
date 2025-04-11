@@ -132,14 +132,23 @@
       }
 
       .countdown-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
       }
 
-      .time-display {
-        font-size: 1.5rem;
+      .countdown-item {
+        padding: 0.5rem;
       }
 
       .countdown-value {
+        font-size: 1.25rem;
+      }
+
+      .countdown-label {
+        font-size: 0.75rem;
+      }
+
+      .time-display {
         font-size: 1.5rem;
       }
 
@@ -151,7 +160,20 @@
     /* Small Mobile Devices */
     @media (max-width: 375px) {
       .countdown-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.25rem;
+      }
+
+      .countdown-value {
+        font-size: 1rem;
+      }
+
+      .countdown-label {
+        font-size: 0.65rem;
+      }
+
+      .countdown-item {
+        padding: 0.25rem;
       }
     }
   </style>
@@ -245,8 +267,8 @@
       { name: "Phạm Văn Nhu", relation: "Cụ nội", date: "08/04" },
       { name: "Lê Thị Nguyệt", relation: "Cụ bà cả", date: "13/04" },
       { name: "Nguyễn Hữu Ngân", relation: "Bố vợ", date: "14/05" },
-      { name: "Phạm Văn Tiếm", relation: "Kỳ nội", date: "01/08" },
-      { name: "Lê Thị Sửu", relation: "Kỳ bà", date: "23/09" },
+      { name: "Phạm Văn Tiếm", relation: "Kỵ nội", date: "01/08" },
+      { name: "Lê Thị Sửu", relation: "Kỵ bà", date: "23/09" },
       { name: "Lê Thị Viễn", relation: "Cụ bà hai", date: "01/10" },
       { name: "Phạm Văn Hại", relation: "Ông nội", date: "27/10" },
       { name: "Vũ Thị Lơ", relation: "Bà nội", date: "15/12" }
