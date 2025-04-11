@@ -507,50 +507,51 @@
         today.getFullYear()
       );
 
-      let possibleDates = [];
+      let nearestDate = null;
+      let minDiff = Infinity;
       
       gioList.forEach(person => {
         const [day, month] = person.date.split('/').map(Number);
         
         // Thử với năm hiện tại
         const thisYearDate = convertLunar2Solar(day, month, currentLunar.year, false);
-        if (thisYearDate.getTime() > today.getTime()) {
-          possibleDates.push({
+        const thisYearDiff = thisYearDate.getTime() - today.getTime();
+        
+        if (thisYearDiff > 0 && thisYearDiff < minDiff) {
+          minDiff = thisYearDiff;
+          nearestDate = {
             date: thisYearDate,
             person: person,
             lunarDay: day,
             lunarMonth: month,
             lunarYear: currentLunar.year
-          });
+          };
         }
         
         // Thử với năm sau
         const nextYearDate = convertLunar2Solar(day, month, currentLunar.year + 1, false);
-        if (nextYearDate.getTime() > today.getTime()) {
-          possibleDates.push({
+        const nextYearDiff = nextYearDate.getTime() - today.getTime();
+        
+        if (nextYearDiff > 0 && nextYearDiff < minDiff) {
+          minDiff = nextYearDiff;
+          nearestDate = {
             date: nextYearDate,
             person: person,
             lunarDay: day,
             lunarMonth: month,
             lunarYear: currentLunar.year + 1
-          });
+          };
         }
       });
 
-      // Sắp xếp theo thời gian và lấy ngày gần nhất
-      possibleDates.sort((a, b) => a.date.getTime() - b.date.getTime());
-      
-      // Lọc ra ngày gần nhất trong tương lai
-      const nextDate = possibleDates.find(d => d.date.getTime() > today.getTime());
-      
-      if (nextDate) {
+      if (nearestDate) {
         return {
-          nextDate: nextDate.date,
-          nextPerson: nextDate.person,
+          nextDate: nearestDate.date,
+          nextPerson: nearestDate.person,
           lunarInfo: {
-            day: nextDate.lunarDay,
-            month: nextDate.lunarMonth,
-            year: nextDate.lunarYear
+            day: nearestDate.lunarDay,
+            month: nearestDate.lunarMonth,
+            year: nearestDate.lunarYear
           }
         };
       }
