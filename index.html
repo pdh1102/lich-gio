@@ -328,14 +328,14 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const gioList = [
-        { name: "Phạm Văn Nhu", date: "08/04", note: "Cha cụ Phạm Văn Tiêm" },
+        { name: "Phạm Văn Nhu", date: "08/04", note: "con cụ Phạm Văn Tiêm" },
         { name: "Lê Thị Nguyệt", date: "13/04", note: "Vợ cụ Phạm Văn Nhu" },
-        { name: "Nguyễn Hữu Ngân", date: "14/05", note: "" },
-        { name: "Phạm Văn Tiêm", date: "01/08", note: "Con cụ Phạm Văn Nhu" },
-        { name: "Lê Thị Sửu", date: "23/09", note: "Vợ kỵ Tiêm" },
-        { name: "Lê Thị Viễn", date: "01/10", note: "Vợ kế cụ Nhu" },
-        { name: "Phạm Văn Hợi", date: "27/10", note: "Con của kỵ Tiêm" },
-        { name: "Vũ Thị Lơ", date: "15/12", note: "Vợ ông Hợi" }
+        { name: "Nguyễn Hữu Ngân", date: "14/05", note: "Bố vợ" },
+        { name: "Phạm Văn Tiêm", date: "01/08", note: "cha cụ Phạm Văn Nhu" },
+        { name: "Lê Thị Sửu", date: "23/09", note: "Vợ kỵ Phạm Văn Tiêm" },
+        { name: "Lê Thị Viễn", date: "01/10", note: "Vợ hai Phạm Văn Nhu" },
+        { name: "Phạm Văn Hợi", date: "27/10", note: "Con của cụ Phạm Văn Nhu" },
+        { name: "Vũ Thị Lơ", date: "15/12", note: "Vợ ông Phạm Văn Hợi" }
       ];
 
       function formatDate(date) {
@@ -371,19 +371,45 @@
         const currentYear = now.getFullYear();
         
         try {
+          // Tính toán ngày dương của tất cả các ngày giỗ cho năm hiện tại và năm sau
           const dates = await Promise.all(gioList.map(async (e) => {
             const thisYearDate = await lunarToSolar(e.date, currentYear);
             const nextYearDate = await lunarToSolar(e.date, currentYear + 1);
+            
+            // Thêm thông tin tháng và ngày âm lịch để dễ so sánh
+            const [lunarDay, lunarMonth] = e.date.split("/").map(Number);
             return [
-              { ...e, dDate: thisYearDate },
-              { ...e, dDate: nextYearDate }
+              { 
+                ...e, 
+                dDate: thisYearDate,
+                lunarDay,
+                lunarMonth,
+                year: currentYear 
+              },
+              { 
+                ...e, 
+                dDate: nextYearDate,
+                lunarDay,
+                lunarMonth,
+                year: currentYear + 1
+              }
             ];
           }));
 
-          const allDates = dates.flat().filter(d => d.dDate > now)
-            .sort((a, b) => a.dDate - b.dDate);
+          // Làm phẳng mảng và lọc ra các ngày trong tương lai
+          const allDates = dates.flat().filter(d => d.dDate > now);
+
+          // Sắp xếp theo thứ tự thời gian
+          const sortedDates = allDates.sort((a, b) => {
+            // So sánh năm trước
+            if (a.year !== b.year) return a.year - b.year;
+            // Nếu cùng năm, so sánh tháng âm lịch
+            if (a.lunarMonth !== b.lunarMonth) return a.lunarMonth - b.lunarMonth;
+            // Nếu cùng tháng, so sánh ngày âm lịch
+            return a.lunarDay - b.lunarDay;
+          });
           
-          return allDates[0];
+          return sortedDates[0];
         } catch (error) {
           console.error('Error getting next date:', error);
           return null;
@@ -415,7 +441,7 @@
           document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
           document.getElementById("eventDates").innerHTML = `
             <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
-            <strong>Ngày âm:</strong> ${next.date}
+            <strong>Ngày âm:</strong> ${next.lunarDay}/${next.lunarMonth} (âm lịch)
           `;
           document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
         } catch (error) {
