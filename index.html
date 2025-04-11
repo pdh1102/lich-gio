@@ -501,44 +501,70 @@
     // Tìm ngày giỗ tiếp theo
     function findNextAnniversary() {
       const today = new Date();
+      
+      // Lấy ngày âm lịch hiện tại
       const currentLunar = convertSolar2Lunar(
         today.getDate(),
         today.getMonth() + 1,
         today.getFullYear()
       );
-      
-      let nextDate = null;
-      let nextPerson = null;
-      let minDiff = Infinity;
 
+      // Mảng lưu tất cả các ngày giỗ có thể trong năm nay và năm sau
+      let possibleDates = [];
+      
       gioList.forEach(person => {
         const [day, month] = person.date.split('/').map(Number);
-        let lunarYear = currentLunar.year;
-
-        // Nếu ngày giỗ trong năm nay đã qua, tính cho năm sau
-        if (month < currentLunar.month || 
-            (month === currentLunar.month && day < currentLunar.day)) {
-          lunarYear++;
+        
+        // Thử với năm hiện tại
+        const thisYearDate = convertLunar2Solar(day, month, currentLunar.year, false);
+        if (thisYearDate.getTime() > today.getTime()) {
+          possibleDates.push({
+            date: thisYearDate,
+            person: person,
+            lunarDay: day,
+            lunarMonth: month,
+            lunarYear: currentLunar.year
+          });
         }
-
-        const solarDate = convertLunar2Solar(day, month, lunarYear, false);
-        const timeDiff = solarDate.getTime() - today.getTime();
-
-        if (timeDiff > 0 && timeDiff < minDiff) {
-          minDiff = timeDiff;
-          nextDate = solarDate;
-          nextPerson = person;
-        }
+        
+        // Thử với năm sau
+        const nextYearDate = convertLunar2Solar(day, month, currentLunar.year + 1, false);
+        possibleDates.push({
+          date: nextYearDate,
+          person: person,
+          lunarDay: day,
+          lunarMonth: month,
+          lunarYear: currentLunar.year + 1
+        });
       });
 
-      return { nextDate, nextPerson };
+      // Sắp xếp theo thời gian và lấy ngày gần nhất
+      possibleDates.sort((a, b) => a.date.getTime() - b.date.getTime());
+      
+      // Lọc ra ngày gần nhất trong tương lai
+      const nextDate = possibleDates.find(d => d.date.getTime() > today.getTime());
+      
+      if (nextDate) {
+        return {
+          nextDate: nextDate.date,
+          nextPerson: nextDate.person,
+          lunarInfo: {
+            day: nextDate.lunarDay,
+            month: nextDate.lunarMonth,
+            year: nextDate.lunarYear
+          }
+        };
+      }
+      
+      return null;
     }
 
     // Cập nhật đồng hồ đếm ngược
     function updateCountdown() {
-      const { nextDate, nextPerson } = findNextAnniversary();
+      const result = findNextAnniversary();
       
-      if (nextDate && nextPerson) {
+      if (result) {
+        const { nextDate, nextPerson, lunarInfo } = result;
         const now = new Date();
         const diff = nextDate.getTime() - now.getTime();
 
@@ -566,18 +592,13 @@
         });
         document.getElementById('nextSolarDate').textContent = solarDateStr;
 
-        // Lấy và định dạng ngày âm lịch
-        const lunarDate = convertSolar2Lunar(
-          nextDate.getDate(),
-          nextDate.getMonth() + 1,
-          nextDate.getFullYear()
-        );
+        // Hiển thị ngày âm lịch
         document.getElementById('nextLunarDate').textContent = 
-          `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
+          `${lunarInfo.day}/${lunarInfo.month}/${lunarInfo.year}`;
       }
     }
 
-    // Khởi tạo trang
+    // Khởi tạo trang và cập nhật mỗi giây
     document.addEventListener('DOMContentLoaded', () => {
       initializeTable();
       updateCountdown();
