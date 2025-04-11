@@ -56,9 +56,17 @@
       text-align: center;
     }
     .countdown-box h2 {
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       font-size: 1.5rem;
       color: #a0682a;
+    }
+    .event-info {
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    .event-info span {
+      display: block;
     }
     .countdown {
       font-size: 1.3rem;
@@ -70,6 +78,21 @@
       padding: 1.5rem;
       font-size: 0.9rem;
       color: #7a6240;
+    }
+
+    @media (max-width: 600px) {
+      table, th, td {
+        font-size: 0.95rem;
+      }
+      .countdown-box {
+        padding: 1rem;
+      }
+      .countdown-box h2 {
+        font-size: 1.2rem;
+      }
+      .countdown {
+        font-size: 1.1rem;
+      }
     }
   </style>
 </head>
@@ -101,6 +124,10 @@
 
     <div class="countdown-box">
       <h2>Đếm ngược tới ngày giỗ gần nhất</h2>
+      <div class="event-info" id="eventInfo">
+        <span id="eventName"></span>
+        <span id="eventDates"></span>
+      </div>
       <div class="countdown" id="countdown"></div>
     </div>
   </main>
@@ -109,12 +136,17 @@
   </footer>
 
   <script>
-    // Danh sách ngày giỗ theo âm lịch (DD/MM)
-    const gioAmLich = [
-      "08/04", "13/04", "14/05", "01/08", "23/09", "01/10", "27/10", "15/12"
+    const gioList = [
+      { name: "Phạm Văn Nhu", date: "08/04" },
+      { name: "Lê Thị Nguyệt", date: "13/04" },
+      { name: "Nguyễn Hữu Ngân", date: "14/05" },
+      { name: "Phạm Văn Tiêm", date: "01/08" },
+      { name: "Lê Thị Sửu", date: "23/09" },
+      { name: "Lê Thị Viễn", date: "01/10" },
+      { name: "Phạm Văn Hợi", date: "27/10" },
+      { name: "Vũ Thị Lơ", date: "15/12" },
     ];
 
-    // Hàm đơn giản hóa: giả định ngày âm bằng ngày dương (demo thôi)
     function parseDate(ddmm) {
       const [d, m] = ddmm.split("/").map(Number);
       const today = new Date();
@@ -126,15 +158,17 @@
 
     function getNextGio() {
       const today = new Date();
-      const dates = gioAmLich.map(parseDate);
-      dates.sort((a, b) => a - b);
-      return dates.find(d => d >= today);
+      const list = gioList.map(entry => ({
+        ...entry,
+        dDate: parseDate(entry.date)
+      })).sort((a, b) => a.dDate - b.dDate);
+      return list.find(e => e.dDate >= today);
     }
 
     function updateCountdown() {
       const next = getNextGio();
       const now = new Date();
-      const diff = Math.floor((next - now) / 1000);
+      const diff = Math.floor((next.dDate - now) / 1000);
       const days = Math.floor(diff / 86400);
       const hours = Math.floor((diff % 86400) / 3600);
       const minutes = Math.floor((diff % 3600) / 60);
@@ -142,6 +176,11 @@
 
       document.getElementById("countdown").textContent =
         `${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
+
+      const d = next.dDate;
+      document.getElementById("eventName").textContent = `Tên: ${next.name}`;
+      document.getElementById("eventDates").innerHTML =
+        `Ngày dương: ${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}<br>Ngày âm: ${next.date}`;
     }
 
     updateCountdown();
