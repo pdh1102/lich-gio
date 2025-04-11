@@ -555,27 +555,34 @@
       let nearestDate = null;
       let minDiff = Infinity;
       
+      // Lấy thời gian hiện tại theo múi giờ Việt Nam
+      const now = new Date();
+      const vietnamNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+      
       gioList.forEach(person => {
         const [day, month] = person.date.split('/').map(Number);
         
         // Thử với năm hiện tại
         const thisYearDate = convertLunar2Solar(day, month, current.lunar.year, false);
-        const thisYearDiff = thisYearDate.getTime() - current.solar.getTime();
+        const thisYearDiff = thisYearDate.getTime() - vietnamNow.getTime();
         
-        if (thisYearDiff >= 0 && thisYearDiff < minDiff) {
-          minDiff = thisYearDiff;
-          nearestDate = {
-            date: thisYearDate,
-            person: person,
-            lunarDay: day,
-            lunarMonth: month,
-            lunarYear: current.lunar.year
-          };
+        // Chỉ xét các ngày trong tương lai
+        if (thisYearDiff >= 0) {
+          if (thisYearDiff < minDiff) {
+            minDiff = thisYearDiff;
+            nearestDate = {
+              date: thisYearDate,
+              person: person,
+              lunarDay: day,
+              lunarMonth: month,
+              lunarYear: current.lunar.year
+            };
+          }
         }
         
         // Thử với năm sau
         const nextYearDate = convertLunar2Solar(day, month, current.lunar.year + 1, false);
-        const nextYearDiff = nextYearDate.getTime() - current.solar.getTime();
+        const nextYearDiff = nextYearDate.getTime() - vietnamNow.getTime();
         
         if (nextYearDiff >= 0 && nextYearDiff < minDiff) {
           minDiff = nextYearDiff;
@@ -594,11 +601,12 @@
 
     // Cập nhật đồng hồ đếm ngược
     function updateCountdown() {
-      const current = updateCurrentTime();
+      const now = new Date();
+      const vietnamNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
       const result = findNextAnniversary();
       
       if (result) {
-        const diff = result.date.getTime() - current.solar.getTime();
+        const diff = result.date.getTime() - vietnamNow.getTime();
 
         // Tính toán thời gian còn lại
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -608,9 +616,9 @@
 
         // Cập nhật đồng hồ
         document.getElementById('days').textContent = days;
-        document.getElementById('hours').textContent = hours;
-        document.getElementById('minutes').textContent = minutes;
-        document.getElementById('seconds').textContent = seconds;
+        document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
 
         // Cập nhật thông tin ngày giỗ
         document.getElementById('nextPerson').textContent = result.person.name;
@@ -628,6 +636,13 @@
         // Hiển thị ngày âm lịch
         document.getElementById('nextLunarDate').textContent = 
           `${result.lunarDay}/${result.lunarMonth}/${result.lunarYear}`;
+
+        // Nếu đã đến ngày giỗ, tìm ngày giỗ tiếp theo
+        if (diff <= 0) {
+          setTimeout(() => {
+            updateCountdown();
+          }, 1000);
+        }
       } else {
         // Nếu không tìm thấy ngày giỗ nào trong tương lai
         document.getElementById('days').textContent = '--';
