@@ -276,6 +276,19 @@
     </div>
     <div class="countdown-box">
       <div class="countdown-section">
+        <h2>Thời gian hiện tại</h2>
+        <div class="event-info">
+          <span>
+            <strong>Ngày giờ (Dương lịch)</strong>
+            <span id="currentSolarDateTime">--</span>
+          </span>
+          <span>
+            <strong>Ngày (Âm lịch)</strong>
+            <span id="currentLunarDate">--</span>
+          </span>
+        </div>
+      </div>
+      <div class="countdown-section">
         <h2>Đếm ngược đến ngày giỗ tiếp theo</h2>
         <div class="countdown">
           <div class="countdown-item">
@@ -498,24 +511,42 @@
       });
     }
 
-    // Tìm ngày giỗ tiếp theo
-    function findNextAnniversary() {
-      // Lấy thời gian hiện tại theo múi giờ Việt Nam (GMT+7)
+    // Cập nhật thời gian hiện tại
+    function updateCurrentTime() {
       const now = new Date();
       const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
       
-      const today = new Date(
-        vietnamTime.getFullYear(),
-        vietnamTime.getMonth(),
-        vietnamTime.getDate()
-      );
+      // Cập nhật thời gian dương lịch
+      const solarDateTimeStr = vietnamTime.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Ho_Chi_Minh'
+      });
+      document.getElementById('currentSolarDateTime').textContent = solarDateTimeStr;
 
-      const currentLunar = convertSolar2Lunar(
-        today.getDate(),
-        today.getMonth() + 1,
-        today.getFullYear()
+      // Cập nhật ngày âm lịch
+      const lunarDate = convertSolar2Lunar(
+        vietnamTime.getDate(),
+        vietnamTime.getMonth() + 1,
+        vietnamTime.getFullYear()
       );
+      document.getElementById('currentLunarDate').textContent = 
+        `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
 
+      return {
+        solar: vietnamTime,
+        lunar: lunarDate
+      };
+    }
+
+    // Tìm ngày giỗ tiếp theo
+    function findNextAnniversary() {
+      const current = updateCurrentTime();
       let nearestDate = null;
       let minDiff = Infinity;
       
@@ -523,8 +554,8 @@
         const [day, month] = person.date.split('/').map(Number);
         
         // Thử với năm hiện tại
-        const thisYearDate = convertLunar2Solar(day, month, currentLunar.year, false);
-        const thisYearDiff = thisYearDate.getTime() - today.getTime();
+        const thisYearDate = convertLunar2Solar(day, month, current.lunar.year, false);
+        const thisYearDiff = thisYearDate.getTime() - current.solar.getTime();
         
         if (thisYearDiff >= 0 && thisYearDiff < minDiff) {
           minDiff = thisYearDiff;
@@ -533,13 +564,13 @@
             person: person,
             lunarDay: day,
             lunarMonth: month,
-            lunarYear: currentLunar.year
+            lunarYear: current.lunar.year
           };
         }
         
         // Thử với năm sau
-        const nextYearDate = convertLunar2Solar(day, month, currentLunar.year + 1, false);
-        const nextYearDiff = nextYearDate.getTime() - today.getTime();
+        const nextYearDate = convertLunar2Solar(day, month, current.lunar.year + 1, false);
+        const nextYearDiff = nextYearDate.getTime() - current.solar.getTime();
         
         if (nextYearDiff >= 0 && nextYearDiff < minDiff) {
           minDiff = nextYearDiff;
@@ -548,7 +579,7 @@
             person: person,
             lunarDay: day,
             lunarMonth: month,
-            lunarYear: currentLunar.year + 1
+            lunarYear: current.lunar.year + 1
           };
         }
       });
@@ -558,13 +589,11 @@
 
     // Cập nhật đồng hồ đếm ngược
     function updateCountdown() {
+      const current = updateCurrentTime();
       const result = findNextAnniversary();
       
       if (result) {
-        // Sử dụng thời gian Việt Nam để tính toán
-        const now = new Date();
-        const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
-        const diff = result.date.getTime() - vietnamTime.getTime();
+        const diff = result.date.getTime() - current.solar.getTime();
 
         // Tính toán thời gian còn lại
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
