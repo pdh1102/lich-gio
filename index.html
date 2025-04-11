@@ -323,7 +323,7 @@
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lunar-calendar-ts@1.2.7/dist/lunar-calendar.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@dunggramer/lunar-calendar@1.1.7/dist/index.min.js"></script>
   <script>
     const gioList = [
       { name: "Phạm Văn Nhu", relation: "Cụ nội", date: "08/04" },
@@ -352,18 +352,22 @@
 
     // Chuyển đổi ngày dương lịch sang âm lịch
     function solarToLunar(solarDate) {
-      const lunar = LunarCalendar.solarToLunar(solarDate);
+      const result = LunarCalendar.solar2Lunar(
+        solarDate.getDate(),
+        solarDate.getMonth() + 1,
+        solarDate.getFullYear()
+      );
       return {
-        day: lunar.day,
-        month: lunar.month,
-        year: lunar.year
+        day: result.day,
+        month: result.month,
+        year: result.year
       };
     }
 
     // Chuyển đổi ngày âm lịch sang dương lịch
     function lunarToSolar(lunarDay, lunarMonth, lunarYear) {
-      const solar = LunarCalendar.lunarToSolar(lunarYear, lunarMonth, lunarDay);
-      return new Date(solar.year, solar.month - 1, solar.day);
+      const result = LunarCalendar.lunar2Solar(lunarYear, lunarMonth, lunarDay, false);
+      return new Date(result.year, result.month - 1, result.day);
     }
 
     // Tìm ngày giỗ tiếp theo
