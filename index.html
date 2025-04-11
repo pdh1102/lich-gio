@@ -85,6 +85,75 @@
       margin-bottom: 2rem;
     }
 
+    .control-panel {
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      background: var(--primary-color);
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      background: var(--accent-color);
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background: #d35400;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: var(--bg-color);
+      margin: 15% auto;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -254,6 +323,73 @@
       .event-info {
         background: #2c2e33;
       }
+
+      .modal-content {
+        background: #25262b;
+      }
+    }
+
+    .search-panel {
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      background: var(--bg-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .search-group {
+      flex: 1;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .search-group input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    .filter-group select {
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    tr.selected {
+      background-color: rgba(230, 126, 34, 0.1) !important;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem;
+      background: var(--accent-color);
+      color: white;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+      display: none;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .notification.show {
+      display: block;
     }
   </style>
 </head>
@@ -263,6 +399,35 @@
   </header>
   <main>
     <div class="table-container">
+      <div class="control-panel">
+        <button id="addBtn" class="btn">Thêm ngày giỗ</button>
+        <button id="editBtn" class="btn">Sửa</button>
+        <button id="deleteBtn" class="btn">Xóa</button>
+        <button id="exportBtn" class="btn">Xuất lịch</button>
+      </div>
+      <div class="search-panel">
+        <div class="search-group">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên hoặc quan hệ...">
+          <button id="searchBtn" class="btn">Tìm kiếm</button>
+        </div>
+        <div class="filter-group">
+          <select id="monthFilter">
+            <option value="">Tất cả tháng</option>
+            <option value="1">Tháng 1</option>
+            <option value="2">Tháng 2</option>
+            <option value="3">Tháng 3</option>
+            <option value="4">Tháng 4</option>
+            <option value="5">Tháng 5</option>
+            <option value="6">Tháng 6</option>
+            <option value="7">Tháng 7</option>
+            <option value="8">Tháng 8</option>
+            <option value="9">Tháng 9</option>
+            <option value="10">Tháng 10</option>
+            <option value="11">Tháng 11</option>
+            <option value="12">Tháng 12</option>
+          </select>
+        </div>
+      </div>
       <table>
         <thead>
           <tr>
@@ -318,6 +483,28 @@
         </div>
       </div>
     </div>
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle">Thêm ngày giỗ mới</h2>
+        <form id="anniversaryForm">
+          <div class="form-group">
+            <label for="name">Họ và tên:</label>
+            <input type="text" id="name" required>
+          </div>
+          <div class="form-group">
+            <label for="relation">Quan hệ:</label>
+            <input type="text" id="relation" required>
+          </div>
+          <div class="form-group">
+            <label for="date">Ngày giỗ (Âm lịch):</label>
+            <input type="text" id="date" placeholder="DD/MM" required>
+          </div>
+          <button type="submit" class="btn">Lưu</button>
+        </form>
+      </div>
+    </div>
+    <div id="notification" class="notification"></div>
   </main>
   <footer>
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
@@ -484,10 +671,38 @@
       return jdToDate(monthStart + lunarDay - 1);
     }
 
-    // Khởi tạo bảng
+    // Xử lý tìm kiếm và lọc
+    const searchInput = document.getElementById('searchInput');
+    const monthFilter = document.getElementById('monthFilter');
+    let filteredList = [...gioList];
+
+    function filterAndSearch() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const selectedMonth = monthFilter.value;
+
+      filteredList = gioList.filter(person => {
+        const matchesSearch = person.name.toLowerCase().includes(searchTerm) || 
+                            person.relation.toLowerCase().includes(searchTerm);
+        
+        if (selectedMonth) {
+          const [day, month] = person.date.split('/');
+          return matchesSearch && month === selectedMonth;
+        }
+        
+        return matchesSearch;
+      });
+
+      initializeTable();
+    }
+
+    searchInput.addEventListener('input', filterAndSearch);
+    monthFilter.addEventListener('change', filterAndSearch);
+
+    // Cập nhật hàm initializeTable để sử dụng filteredList
     function initializeTable() {
       const tbody = document.getElementById('anniversaryList');
-      gioList.forEach(person => {
+      tbody.innerHTML = '';
+      filteredList.forEach(person => {
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${person.name}</td>
@@ -595,15 +810,163 @@
         // Hiển thị ngày âm lịch
         document.getElementById('nextLunarDate').textContent = 
           `${lunarInfo.day}/${lunarInfo.month}/${lunarInfo.year}`;
+
+        // Kiểm tra và hiển thị thông báo nếu ngày giỗ sắp đến
+        if (days <= 7) {
+          showNotification(
+            `Sắp đến ngày giỗ ${nextPerson.name} (${nextPerson.relation}) còn ${days} ngày nữa`,
+            5000
+          );
+        }
       }
     }
 
-    // Khởi tạo trang và cập nhật mỗi giây
+    // Lưu dữ liệu vào localStorage
+    function saveData() {
+      localStorage.setItem('gioList', JSON.stringify(gioList));
+    }
+
+    // Load dữ liệu từ localStorage
+    function loadData() {
+      const savedData = localStorage.getItem('gioList');
+      if (savedData) {
+        gioList = JSON.parse(savedData);
+      }
+    }
+
+    // Xử lý modal và form
+    const modal = document.getElementById('modal');
+    const form = document.getElementById('anniversaryForm');
+    const modalTitle = document.getElementById('modalTitle');
+    let currentEditIndex = -1;
+
+    document.getElementById('addBtn').addEventListener('click', () => {
+      currentEditIndex = -1;
+      modalTitle.textContent = 'Thêm ngày giỗ mới';
+      form.reset();
+      modal.style.display = 'block';
+    });
+
+    document.getElementById('editBtn').addEventListener('click', () => {
+      const selectedRow = document.querySelector('tr.selected');
+      if (!selectedRow) {
+        alert('Vui lòng chọn ngày giỗ cần sửa');
+        return;
+      }
+      const index = Array.from(selectedRow.parentElement.children).indexOf(selectedRow);
+      currentEditIndex = index;
+      const person = gioList[index];
+      document.getElementById('name').value = person.name;
+      document.getElementById('relation').value = person.relation;
+      document.getElementById('date').value = person.date;
+      modalTitle.textContent = 'Sửa ngày giỗ';
+      modal.style.display = 'block';
+    });
+
+    document.getElementById('deleteBtn').addEventListener('click', () => {
+      const selectedRow = document.querySelector('tr.selected');
+      if (!selectedRow) {
+        alert('Vui lòng chọn ngày giỗ cần xóa');
+        return;
+      }
+      if (confirm('Bạn có chắc chắn muốn xóa ngày giỗ này?')) {
+        const index = Array.from(selectedRow.parentElement.children).indexOf(selectedRow);
+        gioList.splice(index, 1);
+        saveData();
+        initializeTable();
+        updateCountdown();
+      }
+    });
+
+    document.querySelector('.close').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newPerson = {
+        name: document.getElementById('name').value,
+        relation: document.getElementById('relation').value,
+        date: document.getElementById('date').value
+      };
+
+      if (currentEditIndex === -1) {
+        gioList.push(newPerson);
+      } else {
+        gioList[currentEditIndex] = newPerson;
+      }
+
+      saveData();
+      initializeTable();
+      updateCountdown();
+      modal.style.display = 'none';
+    });
+
+    // Thêm sự kiện chọn hàng
+    document.getElementById('anniversaryList').addEventListener('click', (e) => {
+      const row = e.target.closest('tr');
+      if (row) {
+        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+      }
+    });
+
+    // Load dữ liệu khi khởi động
     document.addEventListener('DOMContentLoaded', () => {
+      loadData();
       initializeTable();
       updateCountdown();
       setInterval(updateCountdown, 1000);
     });
+
+    // Xử lý xuất lịch
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "Họ và tên,Quan hệ,Ngày giỗ\n"
+        + gioList.map(person => `${person.name},${person.relation},${person.date}`).join("\n");
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "lich_gio.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // Xử lý thông báo
+    function showNotification(message, duration = 3000) {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, duration);
+    }
+
+    // Kiểm tra ngày giỗ sắp tới và hiển thị thông báo
+    function checkUpcomingAnniversaries() {
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+
+      gioList.forEach(person => {
+        const [day, month] = person.date.split('/').map(Number);
+        const anniversary = new Date(today.getFullYear(), month - 1, day);
+        
+        if (anniversary >= today && anniversary <= nextWeek) {
+          const daysUntil = Math.ceil((anniversary - today) / (1000 * 60 * 60 * 24));
+          showNotification(
+            `Sắp đến ngày giỗ ${person.name} (${person.relation}) còn ${daysUntil} ngày nữa`,
+            5000
+          );
+        }
+      });
+    }
+
+    // Kiểm tra ngày giỗ sắp tới mỗi ngày
+    setInterval(checkUpcomingAnniversaries, 24 * 60 * 60 * 1000);
   </script>
 </body>
 </html>
