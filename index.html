@@ -540,15 +540,22 @@
       // Sắp xếp theo thời gian và lấy ngày gần nhất
       possibleDates.sort((a, b) => a.date.getTime() - b.date.getTime());
       
-      return possibleDates.length > 0 ? {
-        nextDate: possibleDates[0].date,
-        nextPerson: possibleDates[0].person,
-        lunarInfo: {
-          day: possibleDates[0].lunarDay,
-          month: possibleDates[0].lunarMonth,
-          year: possibleDates[0].lunarYear
-        }
-      } : null;
+      // Lọc ra ngày gần nhất trong tương lai
+      const nextDate = possibleDates.find(d => d.date.getTime() > today.getTime());
+      
+      if (nextDate) {
+        return {
+          nextDate: nextDate.date,
+          nextPerson: nextDate.person,
+          lunarInfo: {
+            day: nextDate.lunarDay,
+            month: nextDate.lunarMonth,
+            year: nextDate.lunarYear
+          }
+        };
+      }
+      
+      return null;
     }
 
     // Cập nhật đồng hồ đếm ngược
