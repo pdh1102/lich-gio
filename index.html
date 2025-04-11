@@ -47,18 +47,6 @@
       background-color: #f1d9a7;
       font-weight: bold;
     }
-    .filter-box {
-      margin-bottom: 1.5rem;
-    }
-    .filter-box label {
-      font-size: 1rem;
-      font-weight: bold;
-    }
-    .filter-box select {
-      margin-left: 1rem;
-      padding: 0.3rem 0.6rem;
-      font-size: 1rem;
-    }
     .countdown-box {
       margin-top: 2rem;
       background: #fff3d1;
@@ -125,25 +113,6 @@
     <p>Danh sách được tính theo ngày âm lịch</p>
   </header>
   <main>
-    <div class="filter-box">
-      <label for="monthFilter">Lọc theo tháng âm lịch:</label>
-      <select id="monthFilter">
-        <option value="">-- Tất cả --</option>
-        <option value="01">Tháng 01</option>
-        <option value="02">Tháng 02</option>
-        <option value="03">Tháng 03</option>
-        <option value="04">Tháng 04</option>
-        <option value="05">Tháng 05</option>
-        <option value="06">Tháng 06</option>
-        <option value="07">Tháng 07</option>
-        <option value="08">Tháng 08</option>
-        <option value="09">Tháng 09</option>
-        <option value="10">Tháng 10</option>
-        <option value="11">Tháng 11</option>
-        <option value="12">Tháng 12</option>
-      </select>
-    </div>
-
     <table>
       <thead>
         <tr>
@@ -194,36 +163,38 @@
       { name: "Vũ Thị Lơ", date: "15/12" },
     ];
 
-    function parseDate(ddmm) {
-      const [d, m] = ddmm.split("/").map(Number);
+    async function getLunarToday() {
       const today = new Date();
-      let y = today.getFullYear();
-      let date = new Date(y, m - 1, d);
-      if (date < today) date = new Date(y + 1, m - 1, d);
-      return date;
+      const res = await fetch(`https://api.vietlunar.com/convert?dd=${today.getDate()}&mm=${today.getMonth()+1}&yy=${today.getFullYear()}`);
+      const data = await res.json();
+      return data.lunar;
     }
 
-    function getNextGio() {
-      const today = new Date();
-      const list = gioList.map(entry => ({
-        ...entry,
-        dDate: parseDate(entry.date)
-      })).sort((a, b) => a.dDate - b.dDate);
-      return list.find(e => e.dDate >= today);
+    async function lunarToSolar(dd, mm, yy) {
+      const res = await fetch(`https://api.vietlunar.com/convert?dd=${dd}&mm=${mm}&yy=${yy}&inlunar=true`);
+      const data = await res.json();
+      return new Date(data.solar.yy, data.solar.mm - 1, data.solar.dd);
     }
 
-    async function getLunarDateString(date) {
-      try {
-        const resp = await fetch(`https://api.vietlunar.com/convert?dd=${date.getDate()}&mm=${date.getMonth()+1}&yy=${date.getFullYear()}`);
-        const data = await resp.json();
-        return `${data.lunar.dd}/${data.lunar.mm}/${data.lunar.yy}`;
-      } catch (e) {
-        return "Không thể lấy ngày âm";
-      }
+    async function getNextGioFromLunar() {
+      const today = new Date();
+      const lunarToday = await getLunarToday();
+      const lunarYear = lunarToday.yy;
+
+      const allDates = await Promise.all(gioList.map(async entry => {
+        let d = entry.date.split("/").map(Number);
+        let solarDate = await lunarToSolar(d[0], d[1], lunarYear);
+        if (solarDate < today) {
+          solarDate = await lunarToSolar(d[0], d[1], lunarYear + 1);
+        }
+        return { ...entry, dDate: solarDate };
+      }));
+
+      return allDates.sort((a, b) => a.dDate - b.dDate)[0];
     }
 
     async function updateCountdown() {
-      const next = getNextGio();
+      const next = await getNextGioFromLunar();
       const now = new Date();
       const diff = Math.floor((next.dDate - now) / 1000);
       const days = Math.floor(diff / 86400);
@@ -234,26 +205,17 @@
       document.getElementById("countdown").textContent =
         `${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
 
-      const d = next.dDate;
-      const lunarStr = await getLunarDateString(d);
+      const lunarRes = await fetch(`https://api.vietlunar.com/convert?dd=${next.dDate.getDate()}&mm=${next.dDate.getMonth()+1}&yy=${next.dDate.getFullYear()}`);
+      const lunar = await lunarRes.json();
 
       document.getElementById("eventName").textContent = `Tên: ${next.name}`;
       document.getElementById("eventDates").innerHTML =
-        `Ngày dương: ${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}<br>Ngày âm: ${lunarStr}`;
+        `Ngày dương: ${next.dDate.getDate().toString().padStart(2, '0')}/${(next.dDate.getMonth()+1).toString().padStart(2, '0')}/${next.dDate.getFullYear()}<br>` +
+        `Ngày âm: ${lunar.lunar.dd}/${lunar.lunar.mm}/${lunar.lunar.yy}`;
     }
 
     updateCountdown();
     setInterval(updateCountdown, 1000);
-
-    document.getElementById("monthFilter").addEventListener("change", function () {
-      const selectedMonth = this.value;
-      const rows = document.querySelectorAll("tbody tr");
-      rows.forEach(row => {
-        const dateText = row.children[2].textContent.trim();
-        const month = dateText.split("/")[1];
-        row.style.display = (!selectedMonth || month === selectedMonth) ? "" : "none";
-      });
-    });
   </script>
 </body>
 </html>
