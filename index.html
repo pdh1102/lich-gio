@@ -2,154 +2,38 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lịch giỗ tộc họ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đếm ngược ngày giỗ</title>
   <style>
     body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #f9f5e3;
-      color: #1a1a1a;
-    }
-    header {
-      background-color: #b68d4c;
-      color: #fff;
-      padding: 2rem 1rem 1rem;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-    header p {
-      font-size: 0.95rem;
-      color: #fcecc8;
-    }
-    main {
-      max-width: 960px;
-      margin: 2rem auto;
-      background-color: #fff9e8;
-      padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 1.1rem;
-    }
-    th, td {
-      border-bottom: 1px solid #e5c687;
-      padding: 0.75rem 1rem;
-      text-align: left;
-    }
-    th {
-      background-color: #f1d9a7;
-      font-weight: bold;
-    }
-    .countdown-box {
-      margin-top: 2rem;
-      background: #fff3d1;
-      padding: 1.5rem;
-      border: 2px dashed #d4a243;
-      border-radius: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-    .countdown-section {
-      flex: 1 1 300px;
-      background: #fff;
-      border-radius: 10px;
-      padding: 1rem;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .countdown-section h2 {
-      font-size: 1.2rem;
-      color: #a0682a;
-      margin-bottom: 0.5rem;
-    }
-    .event-info {
-      font-size: 1.1rem;
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
       color: #333;
-    }
-    .event-info span {
-      display: block;
-    }
-    .countdown {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #964b00;
-    }
-    footer {
       text-align: center;
-      padding: 1.5rem;
-      font-size: 0.9rem;
-      color: #7a6240;
+      padding: 50px;
     }
-
-    @media (max-width: 600px) {
-      table, th, td {
-        font-size: 0.95rem;
-      }
-      .countdown-box {
-        flex-direction: column;
-        padding: 1rem;
-      }
-      .countdown-section {
-        font-size: 0.95rem;
-      }
-      .countdown {
-        font-size: 1.1rem;
-      }
+    h1 {
+      color: #b30000;
+    }
+    #countdown {
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+    #eventName {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #004080;
+    }
+    #eventDates {
+      font-size: 1.2rem;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>NGÀY GIỖ NHỮNG NGƯỜI ĐÃ MẤT</h1>
-    <p>Danh sách được tính theo ngày âm lịch</p>
-  </header>
-  <main>
-    <table>
-      <thead>
-        <tr>
-          <th>Họ và tên</th>
-          <th>Quan hệ</th>
-          <th>Ngày Giỗ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>Phạm Văn Nhu</td><td>Cụ nội</td><td>08/04</td></tr>
-        <tr><td>Lê Thị Nguyệt</td><td>Cụ bà cả</td><td>13/04</td></tr>
-        <tr><td>Phạm Văn Tiêm</td><td>Kỵ nội</td><td>01/08</td></tr>
-        <tr><td>Lê Thị Sửu</td><td>Kỵ bà</td><td>23/09</td></tr>
-        <tr><td>Lê Thị Viễn</td><td>Cụ bà hai</td><td>01/10</td></tr>
-        <tr><td>Phạm Văn Hợi</td><td>Ông nội</td><td>27/10</td></tr>
-        <tr><td>Vũ Thị Lơ</td><td>Bà nội</td><td>15/12</td></tr>
-        <tr><td>Nguyễn Hữu Ngân</td><td>Bố vợ</td><td>14/05</td></tr>
-      </tbody>
-    </table>
-
-    <div class="countdown-box">
-      <div class="countdown-section">
-        <h2>Đếm ngược tới ngày giỗ gần nhất</h2>
-        <div class="countdown" id="countdown"></div>
-      </div>
-      <div class="countdown-section">
-        <h2>Thông tin ngày giỗ</h2>
-        <div class="event-info" id="eventInfo">
-          <span id="eventName"></span>
-          <span id="eventDates"></span>
-        </div>
-      </div>
-    </div>
-  </main>
-  <footer>
-    &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
-  </footer>
+  <h1>⏳ Đếm ngược đến ngày giỗ gần nhất</h1>
+  <div id="eventName">Đang tải...</div>
+  <div id="eventDates"></div>
+  <div id="countdown"></div>
 
   <script>
     const gioList = [
@@ -163,22 +47,35 @@
       { name: "Vũ Thị Lơ", date: "15/12" },
     ];
 
-    function lunarDateToSolar(year, lunarMonth, lunarDay) {
-      const lunar = require("viet-lunar-calendar");
-      const solar = lunar.convertLunar2Solar({ day: lunarDay, month: lunarMonth, year: year });
-      return new Date(solar.year, solar.month - 1, solar.day);
+    async function convertLunarToSolarViaAPI(lunarDay, lunarMonth, year) {
+      try {
+        const url = `https://api.vietconvert.com/am-duong?ngay=${lunarDay}&thang=${lunarMonth}&nam=${year}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.success) {
+          const { ngay, thang, nam } = data.data;
+          return new Date(`${nam}-${thang}-${ngay}`);
+        } else {
+          console.error("Lỗi lấy ngày dương từ API");
+          return null;
+        }
+      } catch (e) {
+        console.error("Lỗi gọi API:", e);
+        return null;
+      }
     }
 
-    function getNextGio() {
+    async function getNextGio() {
       const today = new Date();
       const currentYear = today.getFullYear();
       const events = [];
 
       for (const entry of gioList) {
         const [dd, mm] = entry.date.split("/").map(Number);
-        let solarDate = lunarDateToSolar(currentYear, mm, dd);
+        let solarDate = await convertLunarToSolarViaAPI(dd, mm, currentYear);
+        if (!solarDate) continue;
         if (solarDate < today) {
-          solarDate = lunarDateToSolar(currentYear + 1, mm, dd);
+          solarDate = await convertLunarToSolarViaAPI(dd, mm, currentYear + 1);
         }
         events.push({ ...entry, dDate: solarDate });
       }
@@ -187,8 +84,8 @@
       return events[0];
     }
 
-    function updateCountdown() {
-      const next = getNextGio();
+    async function updateCountdown() {
+      const next = await getNextGio();
       const now = new Date();
       const diff = Math.floor((next.dDate - now) / 1000);
       const days = Math.floor(diff / 86400);
@@ -199,10 +96,10 @@
       document.getElementById("countdown").textContent =
         `${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
 
-      document.getElementById("eventName").textContent = `Tên: ${next.name}`;
+      document.getElementById("eventName").textContent = `👤 Tên: ${next.name}`;
       document.getElementById("eventDates").innerHTML =
-        `Ngày dương: ${next.dDate.getDate().toString().padStart(2, '0')}/${(next.dDate.getMonth()+1).toString().padStart(2, '0')}/${next.dDate.getFullYear()}<br>` +
-        `Ngày âm: ${next.date}/${currentYear}`;
+        `📅 Ngày dương: ${next.dDate.getDate().toString().padStart(2, '0')}/${(next.dDate.getMonth()+1).toString().padStart(2, '0')}/${next.dDate.getFullYear()}<br>` +
+        `🌙 Ngày âm: ${next.date}`;
     }
 
     updateCountdown();
