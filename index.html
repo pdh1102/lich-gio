@@ -13,7 +13,7 @@
   <meta property="og:image" content="https://pdh1102.github.io/lich-gio/og-image.jpg" />
   <link rel="icon" type="image/png" href="favicon.png" />
   <title>Lịch giỗ tộc họ</title>
-  <script src="https://unpkg.com/vietnam-lunar-calendar@1.0.5/dist/index.umd.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/lunar-calendar-js@1.3.1/lunar-calendar.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -188,136 +188,96 @@
   </footer>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Đợi thư viện load xong
-      setTimeout(() => {
-        if (typeof LunarDate === 'undefined') {
-          document.getElementById("countdown").innerHTML = 'Lỗi: Không thể tải thư viện lịch âm';
-          return;
+      const gioList = [
+        { name: "Phạm Văn Nhu", date: "08/04", note: "Cha cụ Phạm Văn Tiêm" },
+        { name: "Lê Thị Nguyệt", date: "13/04", note: "Vợ cụ Phạm Văn Nhu" },
+        { name: "Nguyễn Hữu Ngân", date: "14/05", note: "" },
+        { name: "Phạm Văn Tiêm", date: "01/08", note: "Con cụ Phạm Văn Nhu" },
+        { name: "Lê Thị Sửu", date: "23/09", note: "Vợ kỵ Tiêm" },
+        { name: "Lê Thị Viễn", date: "01/10", note: "Vợ kế cụ Nhu" },
+        { name: "Phạm Văn Hợi", date: "27/10", note: "Con của kỵ Tiêm" },
+        { name: "Vũ Thị Lơ", date: "15/12", note: "Vợ ông Hợi" }
+      ];
+
+      function formatDate(date) {
+        const options = { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          weekday: 'long'
+        };
+        return date.toLocaleDateString('vi-VN', options);
+      }
+
+      function lunarToSolar(lunarStr) {
+        const [day, month] = lunarStr.split("/").map(Number);
+        const today = new Date();
+        const year = today.getFullYear();
+        
+        // Sử dụng lunar-calendar-js để chuyển đổi
+        let solar = LunarCalendar.lunarToSolar(year, month, day, 0, 7);
+        let date = new Date(solar.year, solar.month - 1, solar.day);
+        
+        if (date < today) {
+          solar = LunarCalendar.lunarToSolar(year + 1, month, day, 0, 7);
+          date = new Date(solar.year, solar.month - 1, solar.day);
         }
+        
+        return date;
+      }
 
-        const gioList = [
-          { name: "Phạm Văn Nhu", date: "08/04", note: "Cha cụ Phạm Văn Tiêm" },
-          { name: "Lê Thị Nguyệt", date: "13/04", note: "Vợ cụ Phạm Văn Nhu" },
-          { name: "Nguyễn Hữu Ngân", date: "14/05", note: "" },
-          { name: "Phạm Văn Tiêm", date: "01/08", note: "Con cụ Phạm Văn Nhu" },
-          { name: "Lê Thị Sửu", date: "23/09", note: "Vợ kỵ Tiêm" },
-          { name: "Lê Thị Viễn", date: "01/10", note: "Vợ kế cụ Nhu" },
-          { name: "Phạm Văn Hợi", date: "27/10", note: "Con của kỵ Tiêm" },
-          { name: "Vũ Thị Lơ", date: "15/12", note: "Vợ ông Hợi" }
-        ];
+      function getNextGio() {
+        const now = new Date();
+        const upcoming = gioList.map(e => {
+          const solarDate = lunarToSolar(e.date);
+          return { ...e, dDate: solarDate };
+        }).sort((a, b) => a.dDate - b.dDate);
+        return upcoming[0];
+      }
 
-        function formatDate(date) {
-          try {
-            const options = { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric',
-              weekday: 'long'
-            };
-            return date.toLocaleDateString('vi-VN', options);
-          } catch (error) {
-            console.error('Lỗi format date:', error);
-            return 'Không thể hiển thị ngày';
-          }
-        }
+      function updateCountdown() {
+        const next = getNextGio();
+        const now = new Date();
+        const diff = Math.floor((next.dDate - now) / 1000);
+        
+        const days = Math.floor(diff / 86400);
+        const hours = Math.floor((diff % 86400) / 3600);
+        const minutes = Math.floor((diff % 3600) / 60);
+        const seconds = diff % 60;
 
-        function lunarToSolar(lunarStr) {
-          try {
-            const [day, month] = lunarStr.split("/").map(Number);
-            const today = new Date();
-            const year = today.getFullYear();
-            let solar = LunarDate.convertLunar2Solar({ 
-              lunarDay: day, 
-              lunarMonth: month, 
-              lunarYear: year, 
-              lunarLeap: false 
-            });
-            let date = new Date(solar.solarYear, solar.solarMonth - 1, solar.solarDay);
-            
-            if (date < today) {
-              const nextSolar = LunarDate.convertLunar2Solar({ 
-                lunarDay: day, 
-                lunarMonth: month, 
-                lunarYear: year + 1, 
-                lunarLeap: false 
-              });
-              date = new Date(nextSolar.solarYear, nextSolar.solarMonth - 1, nextSolar.solarDay);
-            }
-            return date;
-          } catch (error) {
-            console.error('Lỗi chuyển đổi âm lịch:', error);
-            return new Date();
-          }
-        }
+        // Cập nhật đồng hồ đếm ngược với hiệu ứng
+        const countdownElement = document.getElementById("countdown");
+        countdownElement.innerHTML = `
+          <div class="countdown-item">
+            <span class="countdown-value">${days}</span>
+            <span class="countdown-label">ngày</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-value">${hours}</span>
+            <span class="countdown-label">giờ</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-value">${minutes}</span>
+            <span class="countdown-label">phút</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-value">${seconds}</span>
+            <span class="countdown-label">giây</span>
+          </div>
+        `;
 
-        function getNextGio() {
-          try {
-            const now = new Date();
-            const upcoming = gioList.map(e => {
-              const solarDate = lunarToSolar(e.date);
-              return { ...e, dDate: solarDate };
-            }).sort((a, b) => a.dDate - b.dDate);
-            return upcoming[0];
-          } catch (error) {
-            console.error('Lỗi tính ngày giỗ tiếp theo:', error);
-            return null;
-          }
-        }
+        // Cập nhật thông tin ngày giỗ
+        document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
+        document.getElementById("eventDates").innerHTML = `
+          <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
+          <strong>Ngày âm:</strong> ${next.date}
+        `;
+        document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
+      }
 
-        function updateCountdown() {
-          try {
-            const next = getNextGio();
-            if (!next) {
-              document.getElementById("countdown").innerHTML = 'Lỗi: Không thể tính ngày giỗ';
-              return;
-            }
-
-            const now = new Date();
-            const diff = Math.floor((next.dDate - now) / 1000);
-            
-            const days = Math.floor(diff / 86400);
-            const hours = Math.floor((diff % 86400) / 3600);
-            const minutes = Math.floor((diff % 3600) / 60);
-            const seconds = diff % 60;
-
-            // Cập nhật đồng hồ đếm ngược với hiệu ứng
-            const countdownElement = document.getElementById("countdown");
-            countdownElement.innerHTML = `
-              <div class="countdown-item">
-                <span class="countdown-value">${days}</span>
-                <span class="countdown-label">ngày</span>
-              </div>
-              <div class="countdown-item">
-                <span class="countdown-value">${hours}</span>
-                <span class="countdown-label">giờ</span>
-              </div>
-              <div class="countdown-item">
-                <span class="countdown-value">${minutes}</span>
-                <span class="countdown-label">phút</span>
-              </div>
-              <div class="countdown-item">
-                <span class="countdown-value">${seconds}</span>
-                <span class="countdown-label">giây</span>
-              </div>
-            `;
-
-            // Cập nhật thông tin ngày giỗ
-            document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
-            document.getElementById("eventDates").innerHTML = `
-              <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
-              <strong>Ngày âm:</strong> ${next.date}
-            `;
-            document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
-          } catch (error) {
-            console.error('Lỗi cập nhật đồng hồ:', error);
-            document.getElementById("countdown").innerHTML = 'Lỗi: Không thể cập nhật đồng hồ';
-          }
-        }
-
-        // Cập nhật mỗi giây
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-      }, 1000); // Đợi 1 giây cho thư viện load
+      // Cập nhật mỗi giây
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
     });
   </script>
 </body>
