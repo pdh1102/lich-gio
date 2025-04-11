@@ -157,71 +157,86 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>LỊCH GIỖ GIA ĐÌNH</h1>
-  </header>
-  <main>
-    <div class="container">
-      <div class="grid-container">
-        <!-- Thời gian hiện tại -->
-        <div class="card">
-          <h2 class="card-title">Thời gian hiện tại</h2>
-          <div class="info-item">
-            <div class="info-label">NGÀY GIỜ (DƯƠNG LỊCH)</div>
-            <div class="info-value" id="current-solar-date">--</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">NGÀY (ÂM LỊCH)</div>
-            <div class="info-value" id="current-lunar-date">--</div>
-          </div>
+  <div class="container">
+    <h1 style="text-align: center; color: var(--primary-color); margin-bottom: 2rem; font-size: 2rem;">LỊCH GIỖ GIA ĐÌNH</h1>
+    <div class="grid-container">
+      <!-- Bảng danh sách ngày giỗ -->
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2 class="card-title">Danh sách ngày giỗ</h2>
+        <div class="table-container">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">HỌ VÀ TÊN</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">QUAN HỆ</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">NGÀY GIỖ (ÂM LỊCH)</th>
+              </tr>
+            </thead>
+            <tbody id="anniversaryList">
+              <!-- Dữ liệu sẽ được thêm vào bằng JavaScript -->
+            </tbody>
+          </table>
         </div>
+      </div>
 
-        <!-- Đếm ngược -->
-        <div class="card">
-          <h2 class="card-title">Đếm ngược đến ngày giỗ tiếp theo</h2>
-          <div class="countdown-container">
-            <div class="countdown-item">
-              <div class="countdown-value" id="days">--</div>
-              <div class="countdown-label">NGÀY</div>
-            </div>
-            <div class="countdown-item">
-              <div class="countdown-value" id="hours">--</div>
-              <div class="countdown-label">GIỜ</div>
-            </div>
-            <div class="countdown-item">
-              <div class="countdown-value" id="minutes">--</div>
-              <div class="countdown-label">PHÚT</div>
-            </div>
-            <div class="countdown-item">
-              <div class="countdown-value" id="seconds">--</div>
-              <div class="countdown-label">GIÂY</div>
-            </div>
-          </div>
+      <!-- Thời gian hiện tại -->
+      <div class="card">
+        <h2 class="card-title">Thời gian hiện tại</h2>
+        <div class="info-item">
+          <div class="info-label">NGÀY GIỜ (DƯƠNG LỊCH)</div>
+          <div class="info-value" id="current-solar-date">--</div>
         </div>
+        <div class="info-item">
+          <div class="info-label">NGÀY (ÂM LỊCH)</div>
+          <div class="info-value" id="current-lunar-date">--</div>
+        </div>
+      </div>
 
-        <!-- Thông tin ngày giỗ -->
-        <div class="card">
-          <h2 class="card-title">Thông tin ngày giỗ sắp tới</h2>
-          <div class="info-item">
-            <div class="info-label">NGƯỜI GIỖ</div>
-            <div class="info-value" id="next-person">--</div>
+      <!-- Đếm ngược -->
+      <div class="card">
+        <h2 class="card-title">Đếm ngược đến ngày giỗ tiếp theo</h2>
+        <div class="countdown-container">
+          <div class="countdown-item">
+            <div class="countdown-value" id="days">--</div>
+            <div class="countdown-label">NGÀY</div>
           </div>
-          <div class="info-item">
-            <div class="info-label">QUAN HỆ</div>
-            <div class="info-value" id="next-relation">--</div>
+          <div class="countdown-item">
+            <div class="countdown-value" id="hours">--</div>
+            <div class="countdown-label">GIỜ</div>
           </div>
-          <div class="info-item">
-            <div class="info-label">NGÀY (DƯƠNG LỊCH)</div>
-            <div class="info-value" id="next-solar-date">--</div>
+          <div class="countdown-item">
+            <div class="countdown-value" id="minutes">--</div>
+            <div class="countdown-label">PHÚT</div>
           </div>
-          <div class="info-item">
-            <div class="info-label">NGÀY (ÂM LỊCH)</div>
-            <div class="info-value" id="next-lunar-date">--</div>
+          <div class="countdown-item">
+            <div class="countdown-value" id="seconds">--</div>
+            <div class="countdown-label">GIÂY</div>
           </div>
         </div>
       </div>
+
+      <!-- Thông tin ngày giỗ -->
+      <div class="card">
+        <h2 class="card-title">Thông tin ngày giỗ sắp tới</h2>
+        <div class="info-item">
+          <div class="info-label">NGƯỜI GIỖ</div>
+          <div class="info-value" id="next-person">--</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">QUAN HỆ</div>
+          <div class="info-value" id="next-relation">--</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">NGÀY (DƯƠNG LỊCH)</div>
+          <div class="info-value" id="next-solar-date">--</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">NGÀY (ÂM LỊCH)</div>
+          <div class="info-value" id="next-lunar-date">--</div>
+        </div>
+      </div>
     </div>
-  </main>
+  </div>
   <footer>
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
@@ -346,12 +361,16 @@
     // Khởi tạo bảng
     function initializeTable() {
       const tbody = document.getElementById('anniversaryList');
+      if (!tbody) return; // Kiểm tra nếu không tìm thấy element
+      
+      tbody.innerHTML = ''; // Xóa dữ liệu cũ nếu có
+      
       gioList.forEach(person => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${person.name}</td>
-          <td>${person.relation}</td>
-          <td>${person.date}</td>
+          <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.name}</td>
+          <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.relation}</td>
+          <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.date}</td>
         `;
         tbody.appendChild(row);
       });
