@@ -275,9 +275,9 @@
       <table>
         <thead>
           <tr>
-            <th>Họ và tên</th>
-            <th>Quan hệ</th>
-            <th>Ngày Giỗ</th>        
+            <th>HỌ VÀ TÊN</th>
+            <th>QUAN HỆ</th>
+            <th>NGÀY GIỖ</th>
           </tr>
         </thead>
         <tbody>
@@ -294,30 +294,45 @@
     </div>
     <div class="countdown-box">
       <div class="countdown-section">
-        <div class="countdown" id="countdown">
+        <h2>Đếm ngược đến ngày giỗ tiếp theo</h2>
+        <div class="countdown">
           <div class="countdown-item">
-            <span class="countdown-value">--</span>
-            <span class="countdown-label">ngày</span>
+            <span class="countdown-value days">--</span>
+            <span class="countdown-label">NGÀY</span>
           </div>
           <div class="countdown-item">
-            <span class="countdown-value">--</span>
-            <span class="countdown-label">giờ</span>
+            <span class="countdown-value hours">--</span>
+            <span class="countdown-label">GIỜ</span>
           </div>
           <div class="countdown-item">
-            <span class="countdown-value">--</span>
-            <span class="countdown-label">phút</span>
+            <span class="countdown-value minutes">--</span>
+            <span class="countdown-label">PHÚT</span>
           </div>
           <div class="countdown-item">
-            <span class="countdown-value">--</span>
-            <span class="countdown-label">giây</span>
+            <span class="countdown-value seconds">--</span>
+            <span class="countdown-label">GIÂY</span>
           </div>
         </div>
       </div>
       <div class="countdown-section">
-        <div class="event-info" id="eventInfo">
-          <span id="eventName"></span>
-          <span id="eventDates"></span>
-          <span id="eventNote"></span>
+        <h2>Thông tin ngày giỗ sắp tới</h2>
+        <div class="event-info">
+          <span>
+            <strong>Người giỗ:</strong>
+            <span class="next-person">--</span>
+          </span>
+          <span>
+            <strong>Quan hệ:</strong>
+            <span class="next-relation">--</span>
+          </span>
+          <span>
+            <strong>Ngày (Dương lịch):</strong>
+            <span class="next-date-solar">--</span>
+          </span>
+          <span>
+            <strong>Ngày (Âm lịch):</strong>
+            <span class="next-date-lunar">--</span>
+          </span>
         </div>
       </div>
     </div>
@@ -325,119 +340,98 @@
   <footer>
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
-  <script src="https://cdn.jsdelivr.net/npm/amlich@2.2.3/amlich.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="https://raw.githubusercontent.com/tvc12/amlich-js/master/amlich.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const gioList = [
-        { name: "Phạm Văn Nhu", date: "08/04", note: "Cha cụ Phạm Văn Tiêm" },
-        { name: "Lê Thị Nguyệt", date: "13/04", note: "Vợ cụ Phạm Văn Nhu" },
-        { name: "Nguyễn Hữu Ngân", date: "14/05", note: "" },
-        { name: "Phạm Văn Tiêm", date: "01/08", note: "Con cụ Phạm Văn Nhu" },
-        { name: "Lê Thị Sửu", date: "23/09", note: "Vợ kỵ Tiêm" },
-        { name: "Lê Thị Viễn", date: "01/10", note: "Vợ kế cụ Nhu" },
-        { name: "Phạm Văn Hợi", date: "27/10", note: "Con của kỵ Tiêm" },
-        { name: "Vũ Thị Lơ", date: "15/12", note: "Vợ ông Hợi" }
-      ];
+    const gioList = [
+      { name: "Phạm Văn Nhu", relation: "Cụ nội", date: "08/04" },
+      { name: "Lê Thị Nguyệt", relation: "Cụ bà cả", date: "13/04" },
+      { name: "Nguyễn Hữu Ngân", relation: "Bố vợ", date: "14/05" },
+      { name: "Phạm Văn Tiếm", relation: "Kỳ nội", date: "01/08" },
+      { name: "Lê Thị Sửu", relation: "Kỳ bà", date: "23/09" },
+      { name: "Lê Thị Viễn", relation: "Cụ bà hai", date: "01/10" },
+      { name: "Phạm Văn Hại", relation: "Ông nội", date: "27/10" },
+      { name: "Vũ Thị Lơ", relation: "Bà nội", date: "15/12" }
+    ];
 
-      function formatDate(date) {
-        const options = { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric',
-          weekday: 'long'
-        };
-        return date.toLocaleDateString('vi-VN', options);
-      }
+    function getNextAnniversary(lunarDate) {
+      const [day, month] = lunarDate.split('/').map(Number);
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      
+      // Convert lunar to solar date for current year
+      const currentYearDate = convertLunarToSolar(currentYear, month, day);
+      const nextYearDate = convertLunarToSolar(currentYear + 1, month, day);
+      
+      // Create Date objects
+      const currentYearDateTime = new Date(currentYearDate.year, currentYearDate.month - 1, currentYearDate.day);
+      const nextYearDateTime = new Date(nextYearDate.year, nextYearDate.month - 1, nextYearDate.day);
+      
+      // Return the closest future date
+      return today > currentYearDateTime ? nextYearDateTime : currentYearDateTime;
+    }
 
-      function getLunarDate(solarDate) {
-        const jd = AL.convertToJuliusDay(solarDate);
-        return AL.convertToLunarDate(jd);
-      }
+    function convertLunarToSolar(year, month, day) {
+      return convertLunar2Solar(day, month, year, 0, 7);
+    }
 
-      function getSolarDate(lunarDay, lunarMonth, lunarYear) {
-        const jd = AL.convertToJuliusDay({
-          day: lunarDay,
-          month: lunarMonth,
-          year: lunarYear,
-          isLeap: false
-        });
-        return AL.convertToSolarDate(jd);
-      }
-
-      function getNextGio() {
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const allDates = [];
-
-        gioList.forEach(gio => {
-          const [day, month] = gio.date.split("/").map(Number);
-          
-          // Thử với năm hiện tại
-          const thisYearSolar = getSolarDate(day, month, currentYear);
-          const thisYearDate = new Date(thisYearSolar.year, thisYearSolar.month - 1, thisYearSolar.day);
-          
-          if (thisYearDate > now) {
-            allDates.push({
-              ...gio,
-              dDate: thisYearDate,
-              lunarDay: day,
-              lunarMonth: month,
-              year: currentYear
-            });
-          }
-
-          // Thử với năm sau
-          const nextYearSolar = getSolarDate(day, month, currentYear + 1);
-          const nextYearDate = new Date(nextYearSolar.year, nextYearSolar.month - 1, nextYearSolar.day);
-          
-          allDates.push({
-            ...gio,
-            dDate: nextYearDate,
-            lunarDay: day,
-            lunarMonth: month,
-            year: currentYear + 1
-          });
-        });
-
-        return allDates.sort((a, b) => a.dDate - b.dDate)[0];
-      }
-
-      function updateCountdown() {
-        const next = getNextGio();
-        if (!next) {
-          document.getElementById("countdown").innerHTML = 'Không thể tải dữ liệu';
-          return;
+    function updateCountdown() {
+      // Find the next anniversary
+      let nextDate = null;
+      let nextPerson = null;
+      let minDiff = Infinity;
+      
+      const today = new Date();
+      
+      gioList.forEach(person => {
+        const anniversaryDate = getNextAnniversary(person.date);
+        const timeDiff = anniversaryDate.getTime() - today.getTime();
+        
+        if (timeDiff > 0 && timeDiff < minDiff) {
+          minDiff = timeDiff;
+          nextDate = anniversaryDate;
+          nextPerson = person;
         }
-
-        const now = new Date();
-        const diff = Math.floor((next.dDate - now) / 1000);
+      });
+      
+      if (nextDate && nextPerson) {
+        const diff = nextDate.getTime() - today.getTime();
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         
-        const days = Math.floor(diff / 86400);
-        const hours = Math.floor((diff % 86400) / 3600);
-        const minutes = Math.floor((diff % 3600) / 60);
-        const seconds = diff % 60;
-
-        // Cập nhật đồng hồ đếm ngược
-        document.querySelectorAll('.countdown-value').forEach((el, i) => {
-          el.textContent = [days, hours, minutes, seconds][i];
-        });
-
-        // Lấy thông tin âm lịch của ngày giỗ
-        const lunarInfo = getLunarDate(next.dDate);
+        // Update countdown values
+        document.querySelector('.countdown-value.days').textContent = days;
+        document.querySelector('.countdown-value.hours').textContent = hours;
+        document.querySelector('.countdown-value.minutes').textContent = minutes;
+        document.querySelector('.countdown-value.seconds').textContent = seconds;
         
-        // Cập nhật thông tin ngày giỗ
-        document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
-        document.getElementById("eventDates").innerHTML = `
-          <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
-          <strong>Ngày âm:</strong> Mùng ${next.lunarDay} tháng ${next.lunarMonth} năm ${lunarInfo.year} (âm lịch)
-        `;
-        document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
+        // Update event info
+        const lunarDate = convertSolar2Lunar(nextDate.getDate(), nextDate.getMonth() + 1, nextDate.getFullYear(), 7);
+        document.querySelector('.next-person').textContent = nextPerson.name;
+        document.querySelector('.next-relation').textContent = nextPerson.relation;
+        document.querySelector('.next-date-solar').textContent = `${nextDate.getDate()}/${nextDate.getMonth() + 1}/${nextDate.getFullYear()}`;
+        document.querySelector('.next-date-lunar').textContent = `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
       }
+    }
 
-      // Cập nhật ban đầu và mỗi giây
-      updateCountdown();
-      setInterval(updateCountdown, 1000);
+    // Initial population of the table
+    const tableBody = document.createElement('tbody');
+    gioList.forEach(person => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${person.name}</td>
+        <td>${person.relation}</td>
+        <td>${person.date}</td>
+      `;
+      tableBody.appendChild(row);
     });
+    document.querySelector('table').appendChild(tableBody);
+
+    // Update countdown every second
+    setInterval(updateCountdown, 1000);
+    updateCountdown(); // Initial update
   </script>
 </body>
 </html>
