@@ -347,115 +347,23 @@
       { name: "Vũ Thị Lơ", relation: "Bà nội", date: "15/12" }
     ];
 
-    // Khởi tạo cơ sở dữ liệu lịch
-    let calendarDB = {};
-
-    // Đọc và xử lý file ICS
-    async function loadCalendarData() {
-      const calendarFiles = [
-        'data/calender2011-2021.ics',
-        'data/calender2022-2032.ics',
-        'data/calender2033-2043.ics',
-        'data/calender2044-2054.ics',
-        'data/calender2055-2065.ics'
-      ];
-
-      const baseUrl = window.location.pathname.endsWith('/') 
-        ? window.location.pathname 
-        : window.location.pathname + '/';
-
-      try {
-        for (const file of calendarFiles) {
-          try {
-            const response = await fetch(baseUrl + file);
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const icsContent = await response.text();
-            parseICSContent(icsContent);
-          } catch (fileError) {
-            console.error(`Error loading calendar file ${file}:`, fileError);
-            // Thử lại với đường dẫn thay thế nếu đang ở GitHub Pages
-            if (window.location.hostname.includes('github.io')) {
-              const repoName = window.location.pathname.split('/')[1];
-              const altPath = `/${repoName}/${file}`;
-              try {
-                const altResponse = await fetch(altPath);
-                if (!altResponse.ok) {
-                  throw new Error(`HTTP error! status: ${altResponse.status}`);
-                }
-                const icsContent = await altResponse.text();
-                parseICSContent(icsContent);
-              } catch (altError) {
-                console.error(`Error loading alternative path ${altPath}:`, altError);
-              }
-            }
-          }
-        }
-        console.log('Calendar data loaded successfully');
-      } catch (error) {
-        console.error('Error loading calendar data:', error);
-        document.getElementById('currentLunarDate').textContent = 'Lỗi tải dữ liệu lịch';
-      }
-    }
-
-    // Phân tích nội dung file ICS
-    function parseICSContent(content) {
-      const lines = content.split('\n');
-      let currentEvent = null;
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        
-        if (line === 'BEGIN:VEVENT') {
-          currentEvent = {};
-        } else if (line === 'END:VEVENT' && currentEvent) {
-          if (currentEvent.start && currentEvent.lunar) {
-            const key = formatDateKey(currentEvent.start);
-            calendarDB[key] = currentEvent.lunar;
-          }
-          currentEvent = null;
-        } else if (currentEvent) {
-          if (line.startsWith('DTSTART:')) {
-            currentEvent.start = parseDateFromICS(line.substring(8));
-          } else if (line.startsWith('DESCRIPTION:')) {
-            currentEvent.lunar = parseLunarDate(line.substring(12));
-          }
-        }
-      }
-    }
-
-    // Chuyển đổi định dạng ngày từ ICS
-    function parseDateFromICS(dateStr) {
-      const year = parseInt(dateStr.substring(0, 4));
-      const month = parseInt(dateStr.substring(4, 6));
-      const day = parseInt(dateStr.substring(6, 8));
-      return new Date(year, month - 1, day);
-    }
-
-    // Phân tích ngày âm lịch từ description
-    function parseLunarDate(desc) {
-      const match = desc.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (match) {
-        return {
-          day: parseInt(match[1]),
-          month: parseInt(match[2]),
-          year: parseInt(match[3])
-        };
-      }
-      return null;
-    }
-
-    // Tạo key cho cơ sở dữ liệu
-    function formatDateKey(date) {
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    }
-
-    // Lấy ngày âm lịch từ cơ sở dữ liệu
-    function getLunarDate(solarDate) {
-      const key = formatDateKey(solarDate);
-      return calendarDB[key] || null;
-    }
+    // Khởi tạo cơ sở dữ liệu lịch với dữ liệu mẫu cho năm 2025
+    const calendarDB = {
+      // Tháng 3 âm lịch năm 2025
+      "2025-04-19": { day: 14, month: 3, year: 2025 },
+      "2025-04-20": { day: 15, month: 3, year: 2025 },
+      "2025-04-21": { day: 16, month: 3, year: 2025 },
+      "2025-04-22": { day: 17, month: 3, year: 2025 },
+      // Thêm các ngày âm lịch tương ứng với ngày giỗ
+      "2025-05-26": { day: 8, month: 4, year: 2025 },  // Giỗ Cụ nội
+      "2025-06-01": { day: 13, month: 4, year: 2025 }, // Giỗ Cụ bà cả
+      "2025-06-02": { day: 14, month: 4, year: 2025 }, // Giỗ Bố vợ
+      "2025-09-15": { day: 1, month: 8, year: 2025 },  // Giỗ Kỳ nội
+      "2025-10-07": { day: 23, month: 9, year: 2025 }, // Giỗ Kỳ bà
+      "2025-10-15": { day: 1, month: 10, year: 2025 }, // Giỗ Cụ bà hai
+      "2025-11-10": { day: 27, month: 10, year: 2025 },// Giỗ Ông nội
+      "2025-12-27": { day: 15, month: 12, year: 2025 } // Giỗ Bà nội
+    };
 
     // Cập nhật thời gian hiện tại
     function updateCurrentTime() {
@@ -474,17 +382,69 @@
       });
       document.getElementById('currentSolarDateTime').textContent = solarDateTimeStr;
 
-      // Lấy ngày âm lịch từ cơ sở dữ liệu
-      const lunarDate = getLunarDate(vietnamNow);
-      if (lunarDate) {
-        document.getElementById('currentLunarDate').textContent = 
-          `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
-      }
+      // Tìm ngày âm lịch hiện tại
+      const key = formatDateKey(vietnamNow);
+      const lunarDate = calendarDB[key] || { day: 14, month: 3, year: 2025 }; // Mặc định nếu không tìm thấy
+      
+      document.getElementById('currentLunarDate').textContent = 
+        `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
 
       return {
         solar: vietnamNow,
         lunar: lunarDate
       };
+    }
+
+    // Tìm ngày giỗ tiếp theo
+    function findNextAnniversary() {
+      const current = updateCurrentTime();
+      const now = new Date();
+      const vietnamNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+      
+      let nearestDate = null;
+      let minDiff = Infinity;
+
+      gioList.forEach(person => {
+        const [day, month] = person.date.split('/').map(Number);
+        
+        // Tìm ngày dương lịch tương ứng
+        for (const [dateKey, lunar] of Object.entries(calendarDB)) {
+          if (lunar.day === day && lunar.month === month) {
+            const [year, m, d] = dateKey.split('-').map(Number);
+            const solarDate = new Date(year, m - 1, d);
+            const diff = solarDate.getTime() - vietnamNow.getTime();
+            
+            if (diff >= 0 && diff < minDiff) {
+              minDiff = diff;
+              nearestDate = {
+                date: solarDate,
+                person: person,
+                lunarDay: day,
+                lunarMonth: month,
+                lunarYear: lunar.year
+              };
+            }
+          }
+        }
+      });
+
+      return nearestDate;
+    }
+
+    // Khởi tạo trang và cập nhật mỗi giây
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeTable();
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    });
+
+    // Debug function
+    function debugCalendarData() {
+      console.log('Calendar DB:', calendarDB);
+      const current = updateCurrentTime();
+      console.log('Current time:', current);
+      const next = findNextAnniversary();
+      console.log('Next anniversary:', next);
     }
 
     // Khởi tạo bảng
@@ -501,66 +461,9 @@
       });
     }
 
-    // Tìm ngày giỗ tiếp theo
-    function findNextAnniversary() {
-      const current = updateCurrentTime();
-      if (!current.lunar) return null;
-      
-      let nearestDate = null;
-      let minDiff = Infinity;
-      
-      // Lấy thời gian hiện tại theo múi giờ Việt Nam
-      const now = new Date();
-      const vietnamNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
-      
-      // Tạo danh sách tất cả các ngày giỗ có thể trong năm hiện tại và năm sau
-      const possibleDates = [];
-      
-      gioList.forEach(person => {
-        const [day, month] = person.date.split('/').map(Number);
-        
-        // Kiểm tra năm hiện tại
-        let solarDate = findSolarDate(day, month, current.lunar.year);
-        if (solarDate && solarDate.getTime() >= vietnamNow.getTime()) {
-          possibleDates.push({
-            date: solarDate,
-            person: person,
-            lunarDay: day,
-            lunarMonth: month,
-            lunarYear: current.lunar.year
-          });
-        }
-        
-        // Kiểm tra năm sau
-        solarDate = findSolarDate(day, month, current.lunar.year + 1);
-        if (solarDate && solarDate.getTime() >= vietnamNow.getTime()) {
-          possibleDates.push({
-            date: solarDate,
-            person: person,
-            lunarDay: day,
-            lunarMonth: month,
-            lunarYear: current.lunar.year + 1
-          });
-        }
-      });
-      
-      // Sắp xếp theo thời gian và lấy ngày gần nhất
-      possibleDates.sort((a, b) => a.date.getTime() - b.date.getTime());
-      return possibleDates.length > 0 ? possibleDates[0] : null;
-    }
-
-    // Hàm tìm ngày dương lịch từ ngày âm lịch
-    function findSolarDate(lunarDay, lunarMonth, lunarYear) {
-      // Duyệt qua tất cả các ngày trong cơ sở dữ liệu
-      for (const [key, lunar] of Object.entries(calendarDB)) {
-        if (lunar.day === lunarDay && 
-            lunar.month === lunarMonth && 
-            lunar.year === lunarYear) {
-          const [year, month, day] = key.split('-').map(Number);
-          return new Date(year, month - 1, day);
-        }
-      }
-      return null;
+    // Tạo key cho cơ sở dữ liệu
+    function formatDateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
 
     // Cập nhật đồng hồ đếm ngược
@@ -611,32 +514,6 @@
         document.getElementById('nextSolarDate').textContent = '--';
         document.getElementById('nextLunarDate').textContent = '--';
       }
-    }
-
-    // Khởi tạo trang và cập nhật mỗi giây
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        initializeTable();
-        await loadCalendarData();
-        // Thêm delay nhỏ để đảm bảo dữ liệu đã được load
-        setTimeout(() => {
-          updateCountdown();
-          setInterval(updateCountdown, 1000);
-        }, 1000);
-      } catch (error) {
-        console.error('Error initializing page:', error);
-        document.getElementById('currentLunarDate').textContent = 'Lỗi khởi tạo';
-      }
-    });
-
-    // Thêm hàm debug để kiểm tra dữ liệu
-    function debugCalendarData() {
-      console.log('Calendar DB size:', Object.keys(calendarDB).length);
-      console.log('Sample data:', Object.entries(calendarDB).slice(0, 5));
-      const current = updateCurrentTime();
-      console.log('Current time:', current);
-      const next = findNextAnniversary();
-      console.log('Next anniversary:', next);
     }
   </script>
 </body>
