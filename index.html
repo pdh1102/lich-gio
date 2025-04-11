@@ -9,8 +9,8 @@
   <meta property="og:title" content="Lịch giỗ tộc họ" />
   <meta property="og:description" content="Theo dõi và nhắc nhở các ngày giỗ trong gia đình" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://[username].github.io/[repository-name]/" />
-  <meta property="og:image" content="https://[username].github.io/[repository-name]/og-image.jpg" />
+  <meta property="og:url" content="https://pdh1102.github.io/lich-gio/" />
+  <meta property="og:image" content="https://pdh1102.github.io/lich-gio/og-image.jpg" />
   <link rel="icon" type="image/png" href="favicon.png" />
   <title>Lịch giỗ tộc họ</title>
   <script src="https://unpkg.com/vietnam-lunar-calendar@1.0.5/dist/index.umd.js"></script>
@@ -262,4 +262,17 @@
       `;
 
       // Cập nhật thông tin ngày giỗ
-      document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`
+      document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
+      document.getElementById("eventDates").innerHTML = `
+        <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
+        <strong>Ngày âm:</strong> ${next.date}
+      `;
+      document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
+    }
+
+    // Cập nhật mỗi giây
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
