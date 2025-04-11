@@ -16,243 +16,142 @@
   <title>Lịch giỗ tộc họ</title>
   <style>
     :root {
-      --primary-color: #34495e;
-      --secondary-color: #2c3e50;
-      --accent-color: #e67e22;
-      --bg-color: #f5f6fa;
-      --text-color: #2c3e50;
-      --border-color: #dcdde1;
-      --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --gradient: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+      --primary-color: #ff6b35;
+      --secondary-color: #2ec4b6;
+      --background-dark: #1a1a1a;
+      --card-background: #242424;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
     }
 
     body {
-      margin: 0;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      background: var(--bg-color);
-      color: var(--text-color);
-      line-height: 1.6;
+      background-color: var(--background-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem;
     }
 
-    header {
-      background: var(--gradient);
-      color: #fff;
-      padding: 3rem 1rem;
-      text-align: center;
-      box-shadow: var(--box-shadow);
-      position: relative;
-      overflow: hidden;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
     }
 
-    header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-      background-size: cover;
-      opacity: 0.1;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: clamp(1.8rem, 5vw, 2.8rem);
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      position: relative;
-    }
-
-    main {
-      max-width: min(1200px, 95%);
-      margin: -2rem auto 2rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    .table-container {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: var(--box-shadow);
-      overflow: hidden;
-      margin-bottom: 2rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: clamp(0.9rem, 2vw, 1rem);
-      background: #fff;
-    }
-
-    th, td {
-      padding: 1.2rem;
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    th {
-      background: var(--primary-color);
-      color: #fff;
-      font-weight: 600;
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    tr:hover {
-      background-color: #f8f9fa;
-    }
-
-    .countdown-box {
+    .grid-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 2rem;
       margin-top: 2rem;
     }
 
-    .countdown-section {
-      background: #fff;
-      border-radius: 16px;
-      padding: 2rem;
-      box-shadow: var(--box-shadow);
-      transition: transform 0.2s ease;
+    .card {
+      background-color: var(--card-background);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
     }
 
-    .countdown-section:hover {
+    .card:hover {
       transform: translateY(-5px);
     }
 
-    .countdown-section h2 {
-      color: var(--primary-color);
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
+    .card-title {
+      color: var(--secondary-color);
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
-    .countdown {
+    .time-display {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin: 1rem 0;
+    }
+
+    .countdown-container {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
+      text-align: center;
     }
 
     .countdown-item {
-      background: var(--bg-color);
+      background-color: rgba(255, 255, 255, 0.1);
       padding: 1rem;
-      border-radius: 12px;
-      text-align: center;
+      border-radius: 0.5rem;
     }
 
     .countdown-value {
       font-size: 2rem;
-      font-weight: 700;
-      color: var(--accent-color);
-      line-height: 1;
-      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
     }
 
     .countdown-label {
       font-size: 0.875rem;
-      color: #666;
+      color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
-    .event-info {
-      padding: 1rem;
-      border-radius: 12px;
-      background: var(--bg-color);
+    .info-item {
+      margin: 1rem 0;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .event-info span {
-      display: block;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    .info-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
     }
 
-    .event-info strong {
-      color: var(--accent-color);
-      display: block;
-      margin-bottom: 0.3rem;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .info-value {
+      color: var(--text-primary);
+      font-size: 1.125rem;
     }
 
-    footer {
-      text-align: center;
-      padding: 2rem;
-      color: #666;
-      font-size: 0.9rem;
-    }
-
-    footer a {
-      color: var(--accent-color);
-      text-decoration: none;
-    }
-
+    /* Mobile Responsive */
     @media (max-width: 768px) {
-      main {
-        margin-top: -1rem;
+      body {
+        padding: 1rem;
       }
 
-      .countdown-box {
+      .grid-container {
+        grid-template-columns: 1fr;
         gap: 1rem;
       }
 
-      .countdown-section {
-        padding: 1.5rem;
+      .countdown-container {
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      th {
-        font-size: 0.8rem;
+      .time-display {
+        font-size: 1.5rem;
       }
 
-      td {
+      .countdown-value {
+        font-size: 1.5rem;
+      }
+
+      .card {
         padding: 1rem;
       }
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg-color: #1a1b1e;
-        --text-color: #e4e6eb;
-        --border-color: #2c2e33;
-      }
-
-      body {
-        color: var(--text-color);
-      }
-
-      .table-container,
-      .countdown-section,
-      table {
-        background: #25262b;
-      }
-
-      tr:hover {
-        background: #2c2e33;
-      }
-
-      .countdown-item {
-        background: #2c2e33;
-      }
-
-      .event-info span {
-        background: #25262b;
-      }
-
-      .event-info {
-        background: #2c2e33;
+    /* Small Mobile Devices */
+    @media (max-width: 375px) {
+      .countdown-container {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -262,50 +161,63 @@
     <h1>LỊCH GIỖ GIA ĐÌNH</h1>
   </header>
   <main>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>HỌ VÀ TÊN</th>
-            <th>QUAN HỆ</th>
-            <th>NGÀY GIỖ</th>
-          </tr>
-        </thead>
-        <tbody id="anniversaryList"></tbody>
-      </table>
-    </div>
-      <div class="countdown-section">
-        <h2>Đếm ngược đến ngày giỗ tiếp theo</h2>
-        <div class="countdown">
-          <div class="countdown-item">
-            <div class="countdown-value" id="days">--</div>
-            <div class="countdown-label">Ngày</div>
+    <div class="container">
+      <div class="grid-container">
+        <!-- Thời gian hiện tại -->
+        <div class="card">
+          <h2 class="card-title">Thời gian hiện tại</h2>
+          <div class="info-item">
+            <div class="info-label">NGÀY GIỜ (DƯƠNG LỊCH)</div>
+            <div class="info-value" id="current-solar-date">--</div>
           </div>
-          <div class="countdown-item">
-            <div class="countdown-value" id="hours">--</div>
-            <div class="countdown-label">Giờ</div>
-          </div>
-          <div class="countdown-item">
-            <div class="countdown-value" id="minutes">--</div>
-            <div class="countdown-label">Phút</div>
+          <div class="info-item">
+            <div class="info-label">NGÀY (ÂM LỊCH)</div>
+            <div class="info-value" id="current-lunar-date">--</div>
           </div>
         </div>
-      </div>
-      <div class="countdown-section">
-        <h2>Thông tin ngày giỗ sắp tới</h2>
-        <div class="event-info">
-          <span>
-            <strong>Người giỗ</strong>
-            <span id="nextPerson">--</span>
-          </span>
-          <span>
-            <strong>Ngày (Dương lịch)</strong>
-            <span id="nextSolarDate">--</span>
-          </span>
-          <span>
-            <strong>Ngày (Âm lịch)</strong>
-            <span id="nextLunarDate">--</span>
-          </span>
+
+        <!-- Đếm ngược -->
+        <div class="card">
+          <h2 class="card-title">Đếm ngược đến ngày giỗ tiếp theo</h2>
+          <div class="countdown-container">
+            <div class="countdown-item">
+              <div class="countdown-value" id="days">--</div>
+              <div class="countdown-label">NGÀY</div>
+            </div>
+            <div class="countdown-item">
+              <div class="countdown-value" id="hours">--</div>
+              <div class="countdown-label">GIỜ</div>
+            </div>
+            <div class="countdown-item">
+              <div class="countdown-value" id="minutes">--</div>
+              <div class="countdown-label">PHÚT</div>
+            </div>
+            <div class="countdown-item">
+              <div class="countdown-value" id="seconds">--</div>
+              <div class="countdown-label">GIÂY</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thông tin ngày giỗ -->
+        <div class="card">
+          <h2 class="card-title">Thông tin ngày giỗ sắp tới</h2>
+          <div class="info-item">
+            <div class="info-label">NGƯỜI GIỖ</div>
+            <div class="info-value" id="next-person">--</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">QUAN HỆ</div>
+            <div class="info-value" id="next-relation">--</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">NGÀY (DƯƠNG LỊCH)</div>
+            <div class="info-value" id="next-solar-date">--</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">NGÀY (ÂM LỊCH)</div>
+            <div class="info-value" id="next-lunar-date">--</div>
+          </div>
         </div>
       </div>
     </div>
@@ -358,13 +270,13 @@
         second: '2-digit',
         hour12: false
       });
-      document.getElementById('currentSolarDateTime').textContent = solarDateTimeStr;
+      document.getElementById('current-solar-date').textContent = solarDateTimeStr;
 
       // Tìm ngày âm lịch hiện tại
       const key = formatDateKey(vietnamNow);
       const lunarDate = calendarDB[key] || { day: 14, month: 3, year: 2025 }; // Mặc định nếu không tìm thấy
       
-      document.getElementById('currentLunarDate').textContent = 
+      document.getElementById('current-lunar-date').textContent = 
         `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
 
       return {
@@ -472,8 +384,8 @@
         document.getElementById('seconds').textContent = String(Math.max(0, seconds)).padStart(2, '0');
 
         // Cập nhật thông tin ngày giỗ
-        document.getElementById('nextPerson').textContent = result.person.name;
-        document.getElementById('nextRelation').textContent = result.person.relation;
+        document.getElementById('next-person').textContent = result.person.name;
+        document.getElementById('next-relation').textContent = result.person.relation;
         
         // Định dạng ngày dương lịch
         const solarDateStr = result.date.toLocaleString('vi-VN', {
@@ -482,10 +394,10 @@
           year: 'numeric',
           timeZone: 'Asia/Ho_Chi_Minh'
         });
-        document.getElementById('nextSolarDate').textContent = solarDateStr;
+        document.getElementById('next-solar-date').textContent = solarDateStr;
 
         // Hiển thị ngày âm lịch
-        document.getElementById('nextLunarDate').textContent = 
+        document.getElementById('next-lunar-date').textContent = 
           `${result.lunarDay}/${result.lunarMonth}/${result.lunarYear}`;
 
         // Nếu đã qua ngày giỗ, cập nhật lại sau 1 giây
@@ -498,10 +410,10 @@
         document.getElementById('hours').textContent = '--';
         document.getElementById('minutes').textContent = '--';
         document.getElementById('seconds').textContent = '--';
-        document.getElementById('nextPerson').textContent = 'Không có ngày giỗ nào sắp tới';
-        document.getElementById('nextRelation').textContent = '--';
-        document.getElementById('nextSolarDate').textContent = '--';
-        document.getElementById('nextLunarDate').textContent = '--';
+        document.getElementById('next-person').textContent = 'Không có ngày giỗ nào sắp tới';
+        document.getElementById('next-relation').textContent = '--';
+        document.getElementById('next-solar-date').textContent = '--';
+        document.getElementById('next-lunar-date').textContent = '--';
       }
     }
   </script>
