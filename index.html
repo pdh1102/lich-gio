@@ -513,11 +513,11 @@
 
     // Cập nhật thời gian hiện tại
     function updateCurrentTime() {
+      // Lấy thời gian hiện tại theo múi giờ Việt Nam
       const now = new Date();
-      const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
       
       // Cập nhật thời gian dương lịch
-      const solarDateTimeStr = vietnamTime.toLocaleString('vi-VN', {
+      const solarDateTimeStr = now.toLocaleString('vi-VN', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -529,17 +529,20 @@
       });
       document.getElementById('currentSolarDateTime').textContent = solarDateTimeStr;
 
+      // Lấy các thành phần ngày tháng năm theo múi giờ Việt Nam
+      const vietnamDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+      
       // Cập nhật ngày âm lịch
       const lunarDate = convertSolar2Lunar(
-        vietnamTime.getDate(),
-        vietnamTime.getMonth() + 1,
-        vietnamTime.getFullYear()
+        vietnamDate.getDate(),
+        vietnamDate.getMonth() + 1,
+        vietnamDate.getFullYear()
       );
       document.getElementById('currentLunarDate').textContent = 
         `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
 
       return {
-        solar: vietnamTime,
+        solar: vietnamDate,
         lunar: lunarDate
       };
     }
@@ -612,7 +615,7 @@
         document.getElementById('nextRelation').textContent = result.person.relation;
         
         // Định dạng ngày dương lịch
-        const solarDateStr = result.date.toLocaleDateString('vi-VN', {
+        const solarDateStr = result.date.toLocaleString('vi-VN', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
