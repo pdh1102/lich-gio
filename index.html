@@ -347,154 +347,144 @@
       { name: "Vũ Thị Lơ", relation: "Bà nội", date: "15/12" }
     ];
 
-    // Thuật toán tính âm lịch của Hồ Ngọc Đức
-    const PI = Math.PI;
-    
-    function jdFromDate(dd, mm, yy) {
-      var a = Math.floor((14 - mm) / 12);
-      var y = yy + 4800 - a;
-      var m = mm + 12 * a - 3;
-      var jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-      return jd;
-    }
+    // Khởi tạo cơ sở dữ liệu lịch
+    let calendarDB = {};
 
-    function jdToDate(jd) {
-      var a = jd + 32044;
-      var b = Math.floor((4 * a + 3) / 146097);
-      var c = a - Math.floor((b * 146097) / 4);
-      var d = Math.floor((4 * c + 3) / 1461);
-      var e = c - Math.floor((1461 * d) / 4);
-      var m = Math.floor((5 * e + 2) / 153);
-      var day = e - Math.floor((153 * m + 2) / 5) + 1;
-      var month = m + 3 - 12 * Math.floor(m / 10);
-      var year = b * 100 + d - 4800 + Math.floor(m / 10);
-      return new Date(year, month - 1, day);
-    }
+    // Đọc và xử lý file ICS
+    async function loadCalendarData() {
+      const calendarFiles = [
+        'data/calender2011-2021.ics',
+        'data/calender2022-2032.ics',
+        'data/calender2033-2043.ics',
+        'data/calender2044-2054.ics',
+        'data/calender2055-2065.ics'
+      ];
 
-    function NewMoon(k) {
-      var T = k / 1236.85;
-      var T2 = T * T;
-      var T3 = T2 * T;
-      var dr = PI / 180;
-      var Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
-      Jd1 = Jd1 + 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
-      var M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
-      var Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
-      var F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
-      var C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * dr * M);
-      C1 = C1 - 0.4068 * Math.sin(Mpr * dr) + 0.0161 * Math.sin(dr * 2 * Mpr);
-      C1 = C1 - 0.0004 * Math.sin(dr * 3 * Mpr);
-      C1 = C1 + 0.0104 * Math.sin(dr * 2 * F) - 0.0051 * Math.sin(dr * (M + Mpr));
-      C1 = C1 - 0.0074 * Math.sin(dr * (M - Mpr)) + 0.0004 * Math.sin(dr * (2 * F + M));
-      C1 = C1 - 0.0004 * Math.sin(dr * (2 * F - M)) - 0.0006 * Math.sin(dr * (2 * F + Mpr));
-      C1 = C1 + 0.0010 * Math.sin(dr * (2 * F - Mpr)) + 0.0005 * Math.sin(dr * (2 * Mpr + M));
-      var deltat = 0;
-      if (T < -11) {
-        deltat = 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3;
-      } else {
-        deltat = -0.000278 + 0.000265 * T + 0.000262 * T2;
+      const baseUrl = window.location.pathname.endsWith('/') 
+        ? window.location.pathname 
+        : window.location.pathname + '/';
+
+      try {
+        for (const file of calendarFiles) {
+          try {
+            const response = await fetch(baseUrl + file);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const icsContent = await response.text();
+            parseICSContent(icsContent);
+          } catch (fileError) {
+            console.error(`Error loading calendar file ${file}:`, fileError);
+            // Thử lại với đường dẫn thay thế nếu đang ở GitHub Pages
+            if (window.location.hostname.includes('github.io')) {
+              const repoName = window.location.pathname.split('/')[1];
+              const altPath = `/${repoName}/${file}`;
+              try {
+                const altResponse = await fetch(altPath);
+                if (!altResponse.ok) {
+                  throw new Error(`HTTP error! status: ${altResponse.status}`);
+                }
+                const icsContent = await altResponse.text();
+                parseICSContent(icsContent);
+              } catch (altError) {
+                console.error(`Error loading alternative path ${altPath}:`, altError);
+              }
+            }
+          }
+        }
+        console.log('Calendar data loaded successfully');
+      } catch (error) {
+        console.error('Error loading calendar data:', error);
+        document.getElementById('currentLunarDate').textContent = 'Lỗi tải dữ liệu lịch';
       }
-      var JdNew = Jd1 + C1 - deltat;
-      return Math.floor(JdNew + 0.5 + 7 / 24);
     }
 
-    function getSunLongitude(jdn) {
-      var T = (jdn - 2451545.0) / 36525;
-      var T2 = T * T;
-      var dr = PI / 180;
-      var M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
-      var L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2;
-      var DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M);
-      DL = DL + (0.019993 - 0.000101 * T) * Math.sin(dr * 2 * M) + 0.000290 * Math.sin(dr * 3 * M);
-      var L = L0 + DL;
-      L = L * dr;
-      L = L - PI * 2 * (Math.floor(L / (PI * 2)));
-      return Math.floor(L / PI * 6);
-    }
+    // Phân tích nội dung file ICS
+    function parseICSContent(content) {
+      const lines = content.split('\n');
+      let currentEvent = null;
 
-    function getLunarMonth11(yy) {
-      var k = Math.floor((yy - 1900) * 12.3685);
-      var nm = NewMoon(k);
-      var sunLong = getSunLongitude(nm);
-      if (sunLong >= 9) {
-        nm = NewMoon(k - 1);
-      }
-      return nm;
-    }
-
-    function getLeapMonthOffset(a11) {
-      var k = Math.floor((a11 - 2415021.076998695) / 29.530588853 + 0.5);
-      var last = 0;
-      var i = 1;
-      var arc = getSunLongitude(NewMoon(k + i));
-      do {
-        last = arc;
-        i++;
-        arc = getSunLongitude(NewMoon(k + i));
-      } while (arc != last && i < 14);
-      return i - 1;
-    }
-
-    function convertSolar2Lunar(dd, mm, yy) {
-      var dayNumber = jdFromDate(dd, mm, yy);
-      var k = Math.floor((dayNumber - 2415021.076998695) / 29.530588853);
-      var monthStart = NewMoon(k + 1);
-      if (monthStart > dayNumber) {
-        monthStart = NewMoon(k);
-      }
-      var a11 = getLunarMonth11(yy);
-      var b11 = a11;
-      if (a11 >= monthStart) {
-        lunarYear = yy;
-        a11 = getLunarMonth11(yy - 1);
-      } else {
-        lunarYear = yy + 1;
-        b11 = getLunarMonth11(yy + 1);
-      }
-      var lunarDay = dayNumber - monthStart + 1;
-      var diff = Math.floor((monthStart - a11) / 29.530588853);
-      var lunarLeap = false;
-      var lunarMonth = diff + 11;
-      if (b11 - a11 > 365) {
-        var leapMonthDiff = getLeapMonthOffset(a11);
-        if (diff >= leapMonthDiff) {
-          lunarMonth = diff + 10;
-          if (diff == leapMonthDiff) {
-            lunarLeap = true;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        if (line === 'BEGIN:VEVENT') {
+          currentEvent = {};
+        } else if (line === 'END:VEVENT' && currentEvent) {
+          if (currentEvent.start && currentEvent.lunar) {
+            const key = formatDateKey(currentEvent.start);
+            calendarDB[key] = currentEvent.lunar;
+          }
+          currentEvent = null;
+        } else if (currentEvent) {
+          if (line.startsWith('DTSTART:')) {
+            currentEvent.start = parseDateFromICS(line.substring(8));
+          } else if (line.startsWith('DESCRIPTION:')) {
+            currentEvent.lunar = parseLunarDate(line.substring(12));
           }
         }
       }
-      if (lunarMonth > 12) {
-        lunarMonth = lunarMonth - 12;
-      }
-      if (lunarMonth >= 11 && diff < 4) {
-        lunarYear -= 1;
-      }
-      return { day: lunarDay, month: lunarMonth, year: lunarYear, leap: lunarLeap };
     }
 
-    function convertLunar2Solar(lunarDay, lunarMonth, lunarYear, lunarLeap) {
-      var k = Math.floor((lunarYear - 1900) * 12.3685);
-      var a11 = getLunarMonth11(lunarYear);
-      var b11 = a11;
-      var off = lunarMonth - 11;
-      if (off < 0) {
-        off += 12;
+    // Chuyển đổi định dạng ngày từ ICS
+    function parseDateFromICS(dateStr) {
+      const year = parseInt(dateStr.substring(0, 4));
+      const month = parseInt(dateStr.substring(4, 6));
+      const day = parseInt(dateStr.substring(6, 8));
+      return new Date(year, month - 1, day);
+    }
+
+    // Phân tích ngày âm lịch từ description
+    function parseLunarDate(desc) {
+      const match = desc.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (match) {
+        return {
+          day: parseInt(match[1]),
+          month: parseInt(match[2]),
+          year: parseInt(match[3])
+        };
       }
-      if (b11 - a11 > 365) {
-        var leapOff = getLeapMonthOffset(a11);
-        var leapMonth = leapOff - 2;
-        if (leapMonth < 0) {
-          leapMonth += 12;
-        }
-        if (lunarLeap && lunarMonth != leapMonth) {
-          return new Date(0, 0, 0);
-        } else if (lunarLeap != 0 || off >= leapOff) {
-          off += 1;
-        }
+      return null;
+    }
+
+    // Tạo key cho cơ sở dữ liệu
+    function formatDateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    // Lấy ngày âm lịch từ cơ sở dữ liệu
+    function getLunarDate(solarDate) {
+      const key = formatDateKey(solarDate);
+      return calendarDB[key] || null;
+    }
+
+    // Cập nhật thời gian hiện tại
+    function updateCurrentTime() {
+      const now = new Date();
+      const vietnamNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+      
+      // Cập nhật thời gian dương lịch
+      const solarDateTimeStr = vietnamNow.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      document.getElementById('currentSolarDateTime').textContent = solarDateTimeStr;
+
+      // Lấy ngày âm lịch từ cơ sở dữ liệu
+      const lunarDate = getLunarDate(vietnamNow);
+      if (lunarDate) {
+        document.getElementById('currentLunarDate').textContent = 
+          `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
       }
-      var monthStart = NewMoon(k + off);
-      return jdToDate(monthStart + lunarDay - 1);
+
+      return {
+        solar: vietnamNow,
+        lunar: lunarDate
+      };
     }
 
     // Khởi tạo bảng
@@ -509,44 +499,6 @@
         `;
         tbody.appendChild(row);
       });
-    }
-
-    // Cập nhật thời gian hiện tại
-    function updateCurrentTime() {
-      // Lấy thời gian hiện tại theo múi giờ Việt Nam
-      const now = new Date();
-      
-      // Cập nhật thời gian dương lịch
-      const solarDateTimeStr = now.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-        timeZone: 'Asia/Ho_Chi_Minh'
-      });
-      document.getElementById('currentSolarDateTime').textContent = solarDateTimeStr;
-
-      // Lấy các thành phần ngày tháng năm theo múi giờ Việt Nam
-      const vietnamDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
-      
-      // Cập nhật ngày âm lịch
-      const lunarDate = {
-        day: 14,
-        month: 3,
-        year: 2025,
-        leap: false
-      };
-      
-      document.getElementById('currentLunarDate').textContent = 
-        `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
-
-      return {
-        solar: vietnamDate,
-        lunar: lunarDate
-      };
     }
 
     // Tìm ngày giỗ tiếp theo
@@ -657,8 +609,9 @@
     }
 
     // Khởi tạo trang và cập nhật mỗi giây
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       initializeTable();
+      await loadCalendarData(); // Đợi dữ liệu lịch được tải xong
       updateCountdown();
       setInterval(updateCountdown, 1000);
     });
