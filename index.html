@@ -47,6 +47,24 @@
       background-color: #f1d9a7;
       font-weight: bold;
     }
+    .countdown-box {
+      margin-top: 2rem;
+      background: #fff3d1;
+      padding: 1.5rem;
+      border: 2px dashed #d4a243;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .countdown-box h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #a0682a;
+    }
+    .countdown {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #964b00;
+    }
     footer {
       text-align: center;
       padding: 1.5rem;
@@ -57,7 +75,7 @@
 </head>
 <body>
   <header>
-    <h1>NGÀY GIỖ CÁC THÀNH VIÊN TRONG TỘC HỌ</h1>
+    <h1>NGÀY GIỖ NHỮNG NGƯỜI ĐÃ MẤT</h1>
     <p>Danh sách được tính theo ngày âm lịch</p>
   </header>
   <main>
@@ -70,9 +88,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>Phạm Văn Nhu</td><td>Cụ</td><td>08/04</td></tr>
+        <tr><td>Phạm Văn Nhu</td><td>Cụ nội</td><td>08/04</td></tr>
         <tr><td>Lê Thị Nguyệt</td><td>Cụ bà cả</td><td>13/04</td></tr>
-        <tr><td>Phạm Văn Tiêm</td><td>Kỵ</td><td>01/08</td></tr>
+        <tr><td>Phạm Văn Tiêm</td><td>Kỵ nội</td><td>01/08</td></tr>
         <tr><td>Lê Thị Sửu</td><td>Kỵ bà</td><td>23/09</td></tr>
         <tr><td>Lê Thị Viễn</td><td>Cụ bà hai</td><td>01/10</td></tr>
         <tr><td>Phạm Văn Hợi</td><td>Ông nội</td><td>27/10</td></tr>
@@ -80,9 +98,54 @@
         <tr><td>Nguyễn Hữu Ngân</td><td>Bố vợ</td><td>14/05</td></tr>
       </tbody>
     </table>
+
+    <div class="countdown-box">
+      <h2>Đếm ngược tới ngày giỗ gần nhất</h2>
+      <div class="countdown" id="countdown"></div>
+    </div>
   </main>
   <footer>
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
+
+  <script>
+    // Danh sách ngày giỗ theo âm lịch (DD/MM)
+    const gioAmLich = [
+      "08/04", "13/04", "14/05", "01/08", "23/09", "01/10", "27/10", "15/12"
+    ];
+
+    // Hàm đơn giản hóa: giả định ngày âm bằng ngày dương (demo thôi)
+    function parseDate(ddmm) {
+      const [d, m] = ddmm.split("/").map(Number);
+      const today = new Date();
+      let y = today.getFullYear();
+      let date = new Date(y, m - 1, d);
+      if (date < today) date = new Date(y + 1, m - 1, d);
+      return date;
+    }
+
+    function getNextGio() {
+      const today = new Date();
+      const dates = gioAmLich.map(parseDate);
+      dates.sort((a, b) => a - b);
+      return dates.find(d => d >= today);
+    }
+
+    function updateCountdown() {
+      const next = getNextGio();
+      const now = new Date();
+      const diff = Math.floor((next - now) / 1000);
+      const days = Math.floor(diff / 86400);
+      const hours = Math.floor((diff % 86400) / 3600);
+      const minutes = Math.floor((diff % 3600) / 60);
+      const seconds = diff % 60;
+
+      document.getElementById("countdown").textContent =
+        `${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
 </body>
 </html>
