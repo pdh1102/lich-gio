@@ -435,8 +435,13 @@
     // Khởi tạo trang và cập nhật mỗi giây
     document.addEventListener('DOMContentLoaded', () => {
       initializeTable();
-      updateCountdown();
-      setInterval(updateCountdown, 1000);
+      updateCurrentTime(); // Cập nhật thời gian hiện tại ngay lập tức
+      updateCountdown(); // Cập nhật đếm ngược ngay lập tức
+      // Cập nhật cả thời gian hiện tại và đếm ngược mỗi giây
+      setInterval(() => {
+        updateCurrentTime();
+        updateCountdown();
+      }, 1000);
     });
 
     // Debug function
