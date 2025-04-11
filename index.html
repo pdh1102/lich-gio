@@ -500,7 +500,16 @@
 
     // Tìm ngày giỗ tiếp theo
     function findNextAnniversary() {
-      const today = new Date();
+      // Lấy thời gian hiện tại theo múi giờ Việt Nam (GMT+7)
+      const now = new Date();
+      const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+      
+      const today = new Date(
+        vietnamTime.getFullYear(),
+        vietnamTime.getMonth(),
+        vietnamTime.getDate()
+      );
+
       const currentLunar = convertSolar2Lunar(
         today.getDate(),
         today.getMonth() + 1,
@@ -517,7 +526,7 @@
         const thisYearDate = convertLunar2Solar(day, month, currentLunar.year, false);
         const thisYearDiff = thisYearDate.getTime() - today.getTime();
         
-        if (thisYearDiff > 0 && thisYearDiff < minDiff) {
+        if (thisYearDiff >= 0 && thisYearDiff < minDiff) {
           minDiff = thisYearDiff;
           nearestDate = {
             date: thisYearDate,
@@ -532,7 +541,7 @@
         const nextYearDate = convertLunar2Solar(day, month, currentLunar.year + 1, false);
         const nextYearDiff = nextYearDate.getTime() - today.getTime();
         
-        if (nextYearDiff > 0 && nextYearDiff < minDiff) {
+        if (nextYearDiff >= 0 && nextYearDiff < minDiff) {
           minDiff = nextYearDiff;
           nearestDate = {
             date: nextYearDate,
@@ -544,19 +553,7 @@
         }
       });
 
-      if (nearestDate) {
-        return {
-          nextDate: nearestDate.date,
-          nextPerson: nearestDate.person,
-          lunarInfo: {
-            day: nearestDate.lunarDay,
-            month: nearestDate.lunarMonth,
-            year: nearestDate.lunarYear
-          }
-        };
-      }
-      
-      return null;
+      return nearestDate;
     }
 
     // Cập nhật đồng hồ đếm ngược
@@ -564,9 +561,10 @@
       const result = findNextAnniversary();
       
       if (result) {
-        const { nextDate, nextPerson, lunarInfo } = result;
+        // Sử dụng thời gian Việt Nam để tính toán
         const now = new Date();
-        const diff = nextDate.getTime() - now.getTime();
+        const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+        const diff = result.date.getTime() - vietnamTime.getTime();
 
         // Tính toán thời gian còn lại
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -581,20 +579,21 @@
         document.getElementById('seconds').textContent = seconds;
 
         // Cập nhật thông tin ngày giỗ
-        document.getElementById('nextPerson').textContent = nextPerson.name;
-        document.getElementById('nextRelation').textContent = nextPerson.relation;
+        document.getElementById('nextPerson').textContent = result.person.name;
+        document.getElementById('nextRelation').textContent = result.person.relation;
         
         // Định dạng ngày dương lịch
-        const solarDateStr = nextDate.toLocaleDateString('vi-VN', {
+        const solarDateStr = result.date.toLocaleDateString('vi-VN', {
           day: '2-digit',
           month: '2-digit',
-          year: 'numeric'
+          year: 'numeric',
+          timeZone: 'Asia/Ho_Chi_Minh'
         });
         document.getElementById('nextSolarDate').textContent = solarDateStr;
 
         // Hiển thị ngày âm lịch
         document.getElementById('nextLunarDate').textContent = 
-          `${lunarInfo.day}/${lunarInfo.month}/${lunarInfo.year}`;
+          `${result.lunarDay}/${result.lunarMonth}/${result.lunarYear}`;
       } else {
         // Nếu không tìm thấy ngày giỗ nào trong tương lai
         document.getElementById('days').textContent = '--';
