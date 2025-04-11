@@ -444,20 +444,26 @@
     ];
 
     function getNextAnniversary(lunarDate) {
-      const [day, month] = lunarDate.split('/').map(Number);
+      const [targetDay, targetMonth] = lunarDate.split('/').map(Number);
       const today = new Date();
-      const currentYear = today.getFullYear();
       
-      // Convert lunar to solar date for current year
-      const currentYearDate = convertLunar2Solar(day, month, currentYear, 0, 7);
-      const nextYearDate = convertLunar2Solar(day, month, currentYear + 1, 0, 7);
+      // Lấy ngày âm lịch hiện tại
+      const currentLunar = convertSolar2Lunar(today.getDate(), today.getMonth() + 1, today.getFullYear(), 7);
       
-      // Create Date objects
-      const currentYearDateTime = new Date(currentYearDate.year, currentYearDate.month - 1, currentYearDate.day);
-      const nextYearDateTime = new Date(nextYearDate.year, nextYearDate.month - 1, nextYearDate.day);
+      // Tính năm âm lịch cần xét (năm hiện tại hoặc năm sau)
+      let lunarYear = currentLunar.year;
       
-      // Return the closest future date
-      return today > currentYearDateTime ? nextYearDateTime : currentYearDateTime;
+      // Nếu tháng âm lịch hiện tại lớn hơn tháng giỗ
+      // hoặc đang cùng tháng nhưng ngày hiện tại lớn hơn ngày giỗ
+      // thì phải tính cho năm âm lịch sau
+      if (currentLunar.month > targetMonth || 
+          (currentLunar.month === targetMonth && currentLunar.day > targetDay)) {
+        lunarYear++;
+      }
+      
+      // Chuyển ngày giỗ âm lịch sang dương lịch
+      const solarDate = convertLunar2Solar(targetDay, targetMonth, lunarYear, 0, 7);
+      return new Date(solarDate.year, solarDate.month - 1, solarDate.day);
     }
 
     function updateCountdown() {
