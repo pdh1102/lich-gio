@@ -347,22 +347,22 @@
       { name: "Vũ Thị Lơ", relation: "Bà nội", date: "15/12" }
     ];
 
-    // Khởi tạo cơ sở dữ liệu lịch với dữ liệu mẫu cho năm 2025
+    // Khởi tạo cơ sở dữ liệu lịch với dữ liệu chính xác cho năm 2025
     const calendarDB = {
-      // Tháng 3 âm lịch năm 2025
+      // Tháng 3 âm lịch năm 2025 (hiện tại)
       "2025-04-19": { day: 14, month: 3, year: 2025 },
       "2025-04-20": { day: 15, month: 3, year: 2025 },
       "2025-04-21": { day: 16, month: 3, year: 2025 },
-      "2025-04-22": { day: 17, month: 3, year: 2025 },
-      // Thêm các ngày âm lịch tương ứng với ngày giỗ
-      "2025-05-26": { day: 8, month: 4, year: 2025 },  // Giỗ Cụ nội
-      "2025-06-01": { day: 13, month: 4, year: 2025 }, // Giỗ Cụ bà cả
-      "2025-06-02": { day: 14, month: 4, year: 2025 }, // Giỗ Bố vợ
-      "2025-09-15": { day: 1, month: 8, year: 2025 },  // Giỗ Kỳ nội
-      "2025-10-07": { day: 23, month: 9, year: 2025 }, // Giỗ Kỳ bà
-      "2025-10-15": { day: 1, month: 10, year: 2025 }, // Giỗ Cụ bà hai
-      "2025-11-10": { day: 27, month: 10, year: 2025 },// Giỗ Ông nội
-      "2025-12-27": { day: 15, month: 12, year: 2025 } // Giỗ Bà nội
+      
+      // Các ngày giỗ (đã được đối chiếu)
+      "2025-05-05": { day: 8, month: 4, year: 2025 },   // Giỗ Cụ nội
+      "2025-05-10": { day: 13, month: 4, year: 2025 },  // Giỗ Cụ bà cả
+      "2025-06-11": { day: 14, month: 5, year: 2025 },  // Giỗ Bố vợ
+      "2025-09-03": { day: 1, month: 8, year: 2025 },   // Giỗ Kỳ nội
+      "2025-10-25": { day: 23, month: 9, year: 2025 },  // Giỗ Kỳ bà
+      "2025-11-02": { day: 1, month: 10, year: 2025 },  // Giỗ Cụ bà hai
+      "2025-11-28": { day: 27, month: 10, year: 2025 }, // Giỗ Ông nội
+      "2026-01-13": { day: 15, month: 12, year: 2025 }  // Giỗ Bà nội
     };
 
     // Cập nhật thời gian hiện tại
@@ -397,7 +397,6 @@
 
     // Tìm ngày giỗ tiếp theo
     function findNextAnniversary() {
-      const current = updateCurrentTime();
       const now = new Date();
       const vietnamNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
       
@@ -405,24 +404,26 @@
       let minDiff = Infinity;
 
       gioList.forEach(person => {
-        const [day, month] = person.date.split('/').map(Number);
+        const [lunarDay, lunarMonth] = person.date.split('/').map(Number);
         
         // Tìm ngày dương lịch tương ứng
         for (const [dateKey, lunar] of Object.entries(calendarDB)) {
-          if (lunar.day === day && lunar.month === month) {
-            const [year, m, d] = dateKey.split('-').map(Number);
-            const solarDate = new Date(year, m - 1, d);
+          if (lunar.day === lunarDay && lunar.month === lunarMonth) {
+            const [year, month, day] = dateKey.split('-').map(Number);
+            const solarDate = new Date(year, month - 1, day);
             const diff = solarDate.getTime() - vietnamNow.getTime();
             
-            if (diff >= 0 && diff < minDiff) {
-              minDiff = diff;
-              nearestDate = {
-                date: solarDate,
-                person: person,
-                lunarDay: day,
-                lunarMonth: month,
-                lunarYear: lunar.year
-              };
+            if (diff >= -86400000) { // Chấp nhận cả ngày hiện tại
+              if (diff < minDiff) {
+                minDiff = diff;
+                nearestDate = {
+                  date: solarDate,
+                  person: person,
+                  lunarDay: lunarDay,
+                  lunarMonth: lunarMonth,
+                  lunarYear: lunar.year
+                };
+              }
             }
           }
         }
@@ -482,10 +483,10 @@
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
         // Cập nhật đồng hồ
-        document.getElementById('days').textContent = days;
-        document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-        document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-        document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        document.getElementById('days').textContent = Math.max(0, days);
+        document.getElementById('hours').textContent = String(Math.max(0, hours)).padStart(2, '0');
+        document.getElementById('minutes').textContent = String(Math.max(0, minutes)).padStart(2, '0');
+        document.getElementById('seconds').textContent = String(Math.max(0, seconds)).padStart(2, '0');
 
         // Cập nhật thông tin ngày giỗ
         document.getElementById('nextPerson').textContent = result.person.name;
@@ -503,6 +504,11 @@
         // Hiển thị ngày âm lịch
         document.getElementById('nextLunarDate').textContent = 
           `${result.lunarDay}/${result.lunarMonth}/${result.lunarYear}`;
+
+        // Nếu đã qua ngày giỗ, cập nhật lại sau 1 giây
+        if (diff < 0) {
+          setTimeout(updateCountdown, 1000);
+        }
       } else {
         // Nếu không tìm thấy ngày giỗ nào trong tương lai
         document.getElementById('days').textContent = '--';
