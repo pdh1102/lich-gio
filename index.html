@@ -341,8 +341,97 @@
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-  <script src="https://raw.githubusercontent.com/tvc12/amlich-js/master/amlich.js"></script>
   <script>
+    // Hàm chuyển đổi âm lịch sang dương lịch
+    function convertLunar2Solar(dd, mm, yy, leap, timeZone) {
+      var k = Math.floor(parseFloat(timeZone) / 24);
+      var dayNumber = getLunarDate(dd, mm, yy, k, leap);
+      return jdToDate(dayNumber);
+    }
+
+    // Hàm chuyển đổi dương lịch sang âm lịch
+    function convertSolar2Lunar(dd, mm, yy, timeZone) {
+      var k = Math.floor(parseFloat(timeZone) / 24);
+      var jd = getJuliusDay(dd, mm, yy);
+      return jdToLunar(jd);
+    }
+
+    // Các hàm hỗ trợ tính toán âm lịch
+    function getJuliusDay(dd, mm, yy) {
+      var a = Math.floor((14 - mm) / 12);
+      var y = yy + 4800 - a;
+      var m = mm + 12 * a - 3;
+      var jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+      return jd;
+    }
+
+    function jdToDate(jd) {
+      var a = jd + 32044;
+      var b = Math.floor((4 * a + 3) / 146097);
+      var c = a - Math.floor((b * 146097) / 4);
+      var d = Math.floor((4 * c + 3) / 1461);
+      var e = c - Math.floor((1461 * d) / 4);
+      var m = Math.floor((5 * e + 2) / 153);
+      var day = e - Math.floor((153 * m + 2) / 5) + 1;
+      var month = m + 3 - 12 * Math.floor(m / 10);
+      var year = b * 100 + d - 4800 + Math.floor(m / 10);
+      return { day: day, month: month, year: year };
+    }
+
+    function getLunarDate(dd, mm, yy, k, leap) {
+      var jd = getJuliusDay(dd, mm, yy);
+      return jd - k;
+    }
+
+    function jdToLunar(jd) {
+      var k = Math.floor((jd - 2415021.076998695) / 29.530588853);
+      var monthStart = getNewMoonDay(k + 1, 7);
+      if (monthStart > jd) monthStart = getNewMoonDay(k, 7);
+      var a11 = getLunarMonth11(monthStart.year, 7);
+      var b11 = a11;
+      if (a11 >= monthStart) {
+        b11 = getLunarMonth11(monthStart.year - 1, 7);
+      }
+      var lunarYear = monthStart.year;
+      var lunarMonth = monthStart.month;
+      var lunarDay = monthStart.day + Math.floor(jd - monthStart);
+      return { day: lunarDay, month: lunarMonth, year: lunarYear, leap: 0 };
+    }
+
+    function getNewMoonDay(k, timeZone) {
+      var T = k / 1236.85;
+      var T2 = T * T;
+      var T3 = T2 * T;
+      var dr = Math.PI / 180;
+      var Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
+      Jd1 = Jd1 + 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
+      var M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
+      var Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
+      var F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
+      var C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * dr * M);
+      C1 = C1 - 0.4068 * Math.sin(Mpr * dr) + 0.0161 * Math.sin(dr * 2 * Mpr);
+      C1 = C1 - 0.0004 * Math.sin(dr * 3 * Mpr);
+      C1 = C1 + 0.0104 * Math.sin(dr * 2 * F) - 0.0051 * Math.sin(dr * (M + Mpr));
+      C1 = C1 - 0.0074 * Math.sin(dr * (M - Mpr)) + 0.0004 * Math.sin(dr * (2 * F + M));
+      C1 = C1 - 0.0004 * Math.sin(dr * (2 * F - M)) - 0.0006 * Math.sin(dr * (2 * F + Mpr));
+      C1 = C1 + 0.0010 * Math.sin(dr * (2 * F - Mpr)) + 0.0005 * Math.sin(dr * (2 * Mpr + M));
+      var deltat = 0;
+      if (T < -11) {
+        deltat = 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3;
+      } else {
+        deltat = -0.000278 + 0.000265 * T + 0.000262 * T2;
+      }
+      var JdNew = Jd1 + C1 - deltat;
+      return jdToDate(Math.floor(JdNew + 0.5 + timeZone / 24));
+    }
+
+    function getLunarMonth11(yy, timeZone) {
+      var k = Math.floor((yy - 1900) * 12.3685);
+      var monthStart = getNewMoonDay(k + 12, timeZone);
+      if (monthStart.year < yy) monthStart = getNewMoonDay(k + 13, timeZone);
+      return monthStart;
+    }
+
     const gioList = [
       { name: "Phạm Văn Nhu", relation: "Cụ nội", date: "08/04" },
       { name: "Lê Thị Nguyệt", relation: "Cụ bà cả", date: "13/04" },
@@ -360,8 +449,8 @@
       const currentYear = today.getFullYear();
       
       // Convert lunar to solar date for current year
-      const currentYearDate = convertLunarToSolar(currentYear, month, day);
-      const nextYearDate = convertLunarToSolar(currentYear + 1, month, day);
+      const currentYearDate = convertLunar2Solar(day, month, currentYear, 0, 7);
+      const nextYearDate = convertLunar2Solar(day, month, currentYear + 1, 0, 7);
       
       // Create Date objects
       const currentYearDateTime = new Date(currentYearDate.year, currentYearDate.month - 1, currentYearDate.day);
@@ -369,10 +458,6 @@
       
       // Return the closest future date
       return today > currentYearDateTime ? nextYearDateTime : currentYearDateTime;
-    }
-
-    function convertLunarToSolar(year, month, day) {
-      return convertLunar2Solar(day, month, year, 0, 7);
     }
 
     function updateCountdown() {
@@ -415,19 +500,6 @@
         document.querySelector('.next-date-lunar').textContent = `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
       }
     }
-
-    // Initial population of the table
-    const tableBody = document.createElement('tbody');
-    gioList.forEach(person => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${person.name}</td>
-        <td>${person.relation}</td>
-        <td>${person.date}</td>
-      `;
-      tableBody.appendChild(row);
-    });
-    document.querySelector('table').appendChild(tableBody);
 
     // Update countdown every second
     setInterval(updateCountdown, 1000);
