@@ -13,133 +13,215 @@
   <meta property="og:image" content="https://pdh1102.github.io/lich-gio/og-image.jpg" />
   <link rel="icon" type="image/png" href="favicon.png" />
   <title>Lịch giỗ tộc họ</title>
-  <script src="https://cdn.jsdelivr.net/npm/lunar-calendar-js@1.3.1/lunar-calendar.min.js"></script>
   <style>
+    :root {
+      --primary-color: #b68d4c;
+      --secondary-color: #964b00;
+      --bg-color: #f9f5e3;
+      --text-color: #1a1a1a;
+      --border-color: #e5c687;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: "Segoe UI", sans-serif;
-      background: #f9f5e3;
-      color: #1a1a1a;
+      background: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
     }
+
     header {
-      background-color: #b68d4c;
+      background-color: var(--primary-color);
       color: #fff;
-      padding: 2rem 1rem 1rem;
+      padding: 2rem 1rem;
       text-align: center;
+      box-shadow: var(--box-shadow);
     }
+
     header h1 {
       margin: 0;
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 700;
     }
+
     header p {
-      font-size: 0.95rem;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
       color: #fcecc8;
+      margin-top: 0.5rem;
     }
+
     main {
-      max-width: 960px;
+      max-width: min(960px, 95%);
       margin: 2rem auto;
       background-color: #fff9e8;
-      padding: 2rem;
+      padding: clamp(1rem, 3vw, 2rem);
       border-radius: 16px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--box-shadow);
     }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      background: #fff;
     }
+
     th, td {
-      border-bottom: 1px solid #e5c687;
-      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem;
       text-align: left;
     }
+
     th {
       background-color: #f1d9a7;
-      font-weight: bold;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
     }
+
+    tr:hover {
+      background-color: #fff3d1;
+    }
+
     .countdown-box {
       margin-top: 2rem;
       background: #fff3d1;
-      padding: 1.5rem;
+      padding: clamp(1rem, 3vw, 1.5rem);
       border: 2px dashed #d4a243;
       border-radius: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
     }
+
     .countdown-section {
-      flex: 1 1 300px;
       background: #fff;
       border-radius: 10px;
-      padding: 1rem;
+      padding: 1.5rem;
       text-align: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+
     .countdown-section h2 {
-      font-size: 1.2rem;
-      color: #a0682a;
-      margin-bottom: 0.5rem;
+      font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+      color: var(--secondary-color);
+      margin-bottom: 1rem;
     }
+
+    .countdown {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .countdown-item {
+      background: #fff;
+      padding: 0.8rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      min-width: 80px;
+    }
+
+    .countdown-value {
+      display: block;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: bold;
+      color: var(--secondary-color);
+    }
+
+    .countdown-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.3rem;
+    }
+
     .event-info {
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2vw, 1.1rem);
       color: #333;
+      text-align: left;
     }
+
     .event-info span {
       display: block;
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
     }
-    .countdown {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #964b00;
+
+    .event-info strong {
+      color: var(--secondary-color);
     }
+
     footer {
       text-align: center;
       padding: 1.5rem;
       font-size: 0.9rem;
       color: #7a6240;
+      margin-top: 2rem;
     }
+
     @media (max-width: 600px) {
-      table, th, td {
-        font-size: 0.95rem;
-      }
       .countdown-box {
-        flex-direction: column;
         padding: 1rem;
       }
-      .countdown-section {
-        font-size: 0.95rem;
+
+      .countdown-item {
+        min-width: 60px;
+        padding: 0.6rem;
       }
-      .countdown {
-        font-size: 1.1rem;
+
+      td:last-child {
+        text-align: right;
       }
     }
-    .countdown-item {
-      display: inline-block;
-      margin: 0 10px;
-      text-align: center;
-      background: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .countdown-value {
-      display: block;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #964b00;
-    }
-    .countdown-label {
-      font-size: 0.9rem;
-      color: #666;
-    }
-    .event-info span {
-      margin-bottom: 10px;
-      display: block;
-      line-height: 1.5;
-    }
-    .event-info strong {
-      color: #964b00;
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #f9f5e3;
+      }
+
+      body {
+        color: var(--text-color);
+      }
+
+      main {
+        background-color: #2d2d2d;
+      }
+
+      table {
+        background: #333;
+      }
+
+      th {
+        background-color: #4a4a4a;
+      }
+
+      tr:hover {
+        background-color: #3d3d3d;
+      }
+
+      .countdown-section, .countdown-item {
+        background: #3d3d3d;
+      }
+
+      .event-info {
+        color: #f0f0f0;
+      }
     }
   </style>
 </head>
@@ -149,29 +231,48 @@
     <p>Danh sách được tính theo ngày âm lịch</p>
   </header>
   <main>
-    <table>
-      <thead>
-        <tr>
-          <th>Họ và tên</th>
-          <th>Quan hệ</th>
-          <th>Ngày Giỗ</th>        
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>Phạm Văn Nhu</td><td>Cụ nội</td><td>08/04</td></tr>
-        <tr><td>Lê Thị Nguyệt</td><td>Cụ bà cả</td><td>13/04</td></tr>
-        <tr><td>Nguyễn Hữu Ngân</td><td>Bố vợ</td><td>14/05</td></tr>
-        <tr><td>Phạm Văn Tiêm</td><td>Kỵ nội</td><td>01/08</td></tr>
-        <tr><td>Lê Thị Sửu</td><td>Kỵ bà</td><td>23/09</td></tr>
-        <tr><td>Lê Thị Viễn</td><td>Cụ bà hai</td><td>01/10</td></tr>
-        <tr><td>Phạm Văn Hợi</td><td>Ông nội</td><td>27/10</td></tr>
-        <tr><td>Vũ Thị Lơ</td><td>Bà nội</td><td>15/12</td></tr>
-      </tbody>
-    </table>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Họ và tên</th>
+            <th>Quan hệ</th>
+            <th>Ngày Giỗ</th>        
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Phạm Văn Nhu</td><td>Cụ nội</td><td>08/04</td></tr>
+          <tr><td>Lê Thị Nguyệt</td><td>Cụ bà cả</td><td>13/04</td></tr>
+          <tr><td>Nguyễn Hữu Ngân</td><td>Bố vợ</td><td>14/05</td></tr>
+          <tr><td>Phạm Văn Tiêm</td><td>Kỵ nội</td><td>01/08</td></tr>
+          <tr><td>Lê Thị Sửu</td><td>Kỵ bà</td><td>23/09</td></tr>
+          <tr><td>Lê Thị Viễn</td><td>Cụ bà hai</td><td>01/10</td></tr>
+          <tr><td>Phạm Văn Hợi</td><td>Ông nội</td><td>27/10</td></tr>
+          <tr><td>Vũ Thị Lơ</td><td>Bà nội</td><td>15/12</td></tr>
+        </tbody>
+      </table>
+    </div>
     <div class="countdown-box">
       <div class="countdown-section">
         <h2>Đếm ngược đến ngày giỗ gần nhất</h2>
-        <div class="countdown" id="countdown">Đang tải...</div>
+        <div class="countdown" id="countdown">
+          <div class="countdown-item">
+            <span class="countdown-value">--</span>
+            <span class="countdown-label">ngày</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-value">--</span>
+            <span class="countdown-label">giờ</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-value">--</span>
+            <span class="countdown-label">phút</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-value">--</span>
+            <span class="countdown-label">giây</span>
+          </div>
+        </div>
       </div>
       <div class="countdown-section">
         <h2>Thông tin ngày giỗ</h2>
@@ -209,73 +310,82 @@
         return date.toLocaleDateString('vi-VN', options);
       }
 
-      function lunarToSolar(lunarStr) {
+      async function lunarToSolar(lunarStr, year) {
         const [day, month] = lunarStr.split("/").map(Number);
-        const today = new Date();
-        const year = today.getFullYear();
-        
-        // Sử dụng lunar-calendar-js để chuyển đổi
-        let solar = LunarCalendar.lunarToSolar(year, month, day, 0, 7);
-        let date = new Date(solar.year, solar.month - 1, solar.day);
-        
-        if (date < today) {
-          solar = LunarCalendar.lunarToSolar(year + 1, month, day, 0, 7);
-          date = new Date(solar.year, solar.month - 1, solar.day);
+        try {
+          const response = await fetch(`https://api.hocmai.vn/calendar/convert?lunar_day=${day}&lunar_month=${month}&lunar_year=${year}&timezone=7`);
+          const data = await response.json();
+          if (data.success) {
+            return new Date(data.data.solar_year, data.data.solar_month - 1, data.data.solar_day);
+          }
+          throw new Error('API conversion failed');
+        } catch (error) {
+          console.error('Error converting date:', error);
+          // Fallback to simple calculation if API fails
+          const lunarMonthAvg = 29.53;
+          const dayFromNewYear = (month - 1) * lunarMonthAvg + day;
+          return new Date(year, 0, Math.floor(dayFromNewYear));
         }
-        
-        return date;
       }
 
-      function getNextGio() {
+      async function getNextGio() {
         const now = new Date();
-        const upcoming = gioList.map(e => {
-          const solarDate = lunarToSolar(e.date);
-          return { ...e, dDate: solarDate };
-        }).sort((a, b) => a.dDate - b.dDate);
-        return upcoming[0];
-      }
-
-      function updateCountdown() {
-        const next = getNextGio();
-        const now = new Date();
-        const diff = Math.floor((next.dDate - now) / 1000);
+        const currentYear = now.getFullYear();
         
-        const days = Math.floor(diff / 86400);
-        const hours = Math.floor((diff % 86400) / 3600);
-        const minutes = Math.floor((diff % 3600) / 60);
-        const seconds = diff % 60;
+        try {
+          const dates = await Promise.all(gioList.map(async (e) => {
+            const thisYearDate = await lunarToSolar(e.date, currentYear);
+            const nextYearDate = await lunarToSolar(e.date, currentYear + 1);
+            return [
+              { ...e, dDate: thisYearDate },
+              { ...e, dDate: nextYearDate }
+            ];
+          }));
 
-        // Cập nhật đồng hồ đếm ngược với hiệu ứng
-        const countdownElement = document.getElementById("countdown");
-        countdownElement.innerHTML = `
-          <div class="countdown-item">
-            <span class="countdown-value">${days}</span>
-            <span class="countdown-label">ngày</span>
-          </div>
-          <div class="countdown-item">
-            <span class="countdown-value">${hours}</span>
-            <span class="countdown-label">giờ</span>
-          </div>
-          <div class="countdown-item">
-            <span class="countdown-value">${minutes}</span>
-            <span class="countdown-label">phút</span>
-          </div>
-          <div class="countdown-item">
-            <span class="countdown-value">${seconds}</span>
-            <span class="countdown-label">giây</span>
-          </div>
-        `;
-
-        // Cập nhật thông tin ngày giỗ
-        document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
-        document.getElementById("eventDates").innerHTML = `
-          <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
-          <strong>Ngày âm:</strong> ${next.date}
-        `;
-        document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
+          const allDates = dates.flat().filter(d => d.dDate > now)
+            .sort((a, b) => a.dDate - b.dDate);
+          
+          return allDates[0];
+        } catch (error) {
+          console.error('Error getting next date:', error);
+          return null;
+        }
       }
 
-      // Cập nhật mỗi giây
+      async function updateCountdown() {
+        try {
+          const next = await getNextGio();
+          if (!next) {
+            document.getElementById("countdown").innerHTML = 'Không thể tải dữ liệu';
+            return;
+          }
+
+          const now = new Date();
+          const diff = Math.floor((next.dDate - now) / 1000);
+          
+          const days = Math.floor(diff / 86400);
+          const hours = Math.floor((diff % 86400) / 3600);
+          const minutes = Math.floor((diff % 3600) / 60);
+          const seconds = diff % 60;
+
+          // Cập nhật đồng hồ đếm ngược
+          document.querySelectorAll('.countdown-value').forEach((el, i) => {
+            el.textContent = [days, hours, minutes, seconds][i];
+          });
+
+          // Cập nhật thông tin ngày giỗ
+          document.getElementById("eventName").innerHTML = `<strong>Người giỗ:</strong> ${next.name}`;
+          document.getElementById("eventDates").innerHTML = `
+            <strong>Ngày dương:</strong> ${formatDate(next.dDate)}<br>
+            <strong>Ngày âm:</strong> ${next.date}
+          `;
+          document.getElementById("eventNote").innerHTML = `<strong>Ghi chú:</strong> ${next.note || 'Không có'}`;
+        } catch (error) {
+          console.error('Error updating countdown:', error);
+        }
+      }
+
+      // Cập nhật ban đầu và mỗi giây
       updateCountdown();
       setInterval(updateCountdown, 1000);
     });
