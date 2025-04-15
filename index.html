@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Lịch giỗ tộc họ - Theo dõi và nhắc nhở các ngày giỗ trong gia đình" />
+  <meta name="description" content="Lịch giỗ - Theo dõi và nhắc nhở các ngày giỗ trong gia đình" />
   <meta name="keywords" content="lịch giỗ, gia đình, ngày giỗ, âm lịch" />
   <meta name="author" content="Hưng" />
-  <meta property="og:title" content="Lịch giỗ tộc họ" />
+  <meta property="og:title" content="Lịch giỗ" />
   <meta property="og:description" content="Theo dõi và nhắc nhở các ngày giỗ trong gia đình" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://pdh1102.github.io/lich-gio/" />
@@ -590,6 +590,7 @@
 
     // Kiểm tra thông tin đăng nhập
     function checkCredentials(username, password) {
+      console.log("Checking credentials:", username, password);
       return username === DEFAULT_USERNAME && password === DEFAULT_PASSWORD;
     }
 
@@ -1076,6 +1077,9 @@
       
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
+      
+      console.log("Login attempt:", username, password);
+      console.log("Expected:", DEFAULT_USERNAME, DEFAULT_PASSWORD);
       
       if (checkCredentials(username, password)) {
         isLoggedIn = true;
