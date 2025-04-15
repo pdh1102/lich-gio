@@ -31,7 +31,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Be Vietnam Pro', sans-serif;
     }
 
     body {
@@ -426,7 +426,7 @@
 
       <!-- Thời gian hiện tại -->
       <div class="card">
-        <h2 class="card-title">Thời gian hiện tại</h2>
+        <h2 class="card-title">Hôm nay</h2>
         <div class="info-item">
           <div class="info-label">NGÀY GIỜ (DƯƠNG LỊCH)</div>
           <div class="info-value" id="current-solar-date">--</div>
@@ -1105,8 +1105,16 @@
 
     // Khởi tạo trang và cập nhật mỗi giây
     document.addEventListener('DOMContentLoaded', () => {
-      // Ẩn nút thêm mới ban đầu
-      document.getElementById('addPersonBtn').style.display = 'none';
+      // Thêm nút thêm mới (bị thiếu trong HTML)
+      const cardTitle = document.querySelector('.card-title');
+      if (!document.getElementById('addPersonBtn')) {
+        const addButton = document.createElement('button');
+        addButton.id = 'addPersonBtn';
+        addButton.className = 'btn btn-primary btn-sm';
+        addButton.textContent = 'Thêm mới';
+        addButton.style.display = 'none';
+        cardTitle.insertBefore(addButton, cardTitle.querySelector('.auth-status'));
+      }
       
       // Cập nhật trạng thái đăng nhập
       updateAuthStatus();
