@@ -22,6 +22,9 @@
       --card-background: #242424;
       --text-primary: #ffffff;
       --text-secondary: #b3b3b3;
+      --success-color: #4caf50;
+      --danger-color: #f44336;
+      --warning-color: #ff9800;
     }
 
     * {
@@ -69,6 +72,9 @@
       margin-bottom: 1rem;
       text-transform: uppercase;
       letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .time-display {
@@ -120,6 +126,185 @@
       font-size: 1.125rem;
     }
 
+    /* Form styles */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #e05a2b;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #25a99d;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #d32f2f;
+    }
+
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--card-background);
+      border-radius: 1rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      color: var(--secondary-color);
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .notification.success {
+      background-color: var(--success-color);
+    }
+
+    .notification.error {
+      background-color: var(--danger-color);
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Table styles */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      color: var(--secondary-color);
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
       body {
@@ -155,6 +340,11 @@
       .card {
         padding: 1rem;
       }
+
+      .modal-content {
+        padding: 1rem;
+        width: 95%;
+      }
     }
 
     /* Small Mobile Devices */
@@ -176,6 +366,14 @@
         padding: 0.25rem;
       }
     }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
   </style>
 </head>
 <body>
@@ -184,7 +382,10 @@
     <div class="grid-container">
       <!-- Bảng danh sách ngày giỗ -->
       <div class="card" style="grid-column: 1 / -1;">
-        <h2 class="card-title">Danh sách ngày giỗ</h2>
+        <h2 class="card-title">
+          Danh sách ngày giỗ
+          <button id="addPersonBtn" class="btn btn-primary btn-sm">Thêm mới</button>
+        </h2>
         <div class="table-container">
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -192,6 +393,7 @@
                 <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">HỌ VÀ TÊN</th>
                 <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">QUAN HỆ</th>
                 <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">NGÀY GIỖ (ÂM LỊCH)</th>
+                <th style="padding: 1rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">THAO TÁC</th>
               </tr>
             </thead>
             <tbody id="anniversaryList">
@@ -259,20 +461,80 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal thêm/sửa người -->
+  <div id="personModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Thêm người mới</h3>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <form id="personForm">
+        <input type="hidden" id="personId">
+        <div class="form-group">
+          <label for="personName" class="form-label">Họ và tên</label>
+          <input type="text" id="personName" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="personRelation" class="form-label">Quan hệ</label>
+          <input type="text" id="personRelation" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="lunarDay" class="form-label">Ngày (Âm lịch)</label>
+          <input type="number" id="lunarDay" class="form-input" min="1" max="31" required>
+        </div>
+        <div class="form-group">
+          <label for="lunarMonth" class="form-label">Tháng (Âm lịch)</label>
+          <input type="number" id="lunarMonth" class="form-input" min="1" max="12" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">Hủy</button>
+          <button type="submit" class="btn btn-primary" id="saveBtn">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal xác nhận xóa -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Xác nhận xóa</h3>
+        <button class="modal-close" id="closeConfirmModal">&times;</button>
+      </div>
+      <p>Bạn có chắc chắn muốn xóa người này khỏi danh sách không?</p>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Hủy</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông báo -->
+  <div id="notification" class="notification">
+    Thông báo
+  </div>
+
   <footer>
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
   <script>
-    const gioList = [
-      { name: "Phạm Văn Nhu", relation: "Cụ nội", date: "08/04" },
-      { name: "Lê Thị Nguyệt", relation: "Cụ bà cả", date: "13/04" },
-      { name: "Nguyễn Hữu Ngân", relation: "Bố vợ", date: "14/05" },
-      { name: "Phạm Văn Tiếm", relation: "Kỵ nội", date: "01/08" },
-      { name: "Lê Thị Sửu", relation: "Kỵ bà", date: "23/09" },
-      { name: "Lê Thị Viễn", relation: "Cụ bà hai", date: "01/10" },
-      { name: "Phạm Văn Hại", relation: "Ông nội", date: "27/10" },
-      { name: "Vũ Thị Lơ", relation: "Bà nội", date: "15/12" }
+    // Khởi tạo danh sách ngày giỗ từ localStorage hoặc dùng danh sách mặc định
+    let gioList = JSON.parse(localStorage.getItem('gioList')) || [
+      { id: 1, name: "Phạm Văn Nhu", relation: "Cụ nội", date: "08/04" },
+      { id: 2, name: "Lê Thị Nguyệt", relation: "Cụ bà cả", date: "13/04" },
+      { id: 3, name: "Nguyễn Hữu Ngân", relation: "Bố vợ", date: "14/05" },
+      { id: 4, name: "Phạm Văn Tiếm", relation: "Kỵ nội", date: "01/08" },
+      { id: 5, name: "Lê Thị Sửu", relation: "Kỵ bà", date: "23/09" },
+      { id: 6, name: "Lê Thị Viễn", relation: "Cụ bà hai", date: "01/10" },
+      { id: 7, name: "Phạm Văn Hại", relation: "Ông nội", date: "27/10" },
+      { id: 8, name: "Vũ Thị Lơ", relation: "Bà nội", date: "15/12" }
     ];
+
+    // Lưu danh sách vào localStorage nếu chưa có
+    if (!localStorage.getItem('gioList')) {
+      localStorage.setItem('gioList', JSON.stringify(gioList));
+    }
 
     // Hàm chuyển đổi dương lịch sang âm lịch
     function solarToLunar(solarDate) {
@@ -479,27 +741,6 @@
       return nearestDate;
     }
 
-    // Khởi tạo trang và cập nhật mỗi giây
-    document.addEventListener('DOMContentLoaded', () => {
-      initializeTable();
-      updateCurrentTime(); // Cập nhật thời gian hiện tại ngay lập tức
-      updateCountdown(); // Cập nhật đếm ngược ngay lập tức
-      // Cập nhật cả thời gian hiện tại và đếm ngược mỗi giây
-      setInterval(() => {
-        updateCurrentTime();
-        updateCountdown();
-      }, 1000);
-    });
-
-    // Debug function
-    function debugCalendarData() {
-      console.log('Calendar DB:', calendarDB);
-      const current = updateCurrentTime();
-      console.log('Current time:', current);
-      const next = findNextAnniversary();
-      console.log('Next anniversary:', next);
-    }
-
     // Khởi tạo bảng
     function initializeTable() {
       const tbody = document.getElementById('anniversaryList');
@@ -513,8 +754,29 @@
           <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.name}</td>
           <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.relation}</td>
           <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.date}</td>
+          <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center;">
+            <div class="action-buttons">
+              <button class="btn btn-secondary btn-sm edit-btn" data-id="${person.id}">Sửa</button>
+              <button class="btn btn-danger btn-sm delete-btn" data-id="${person.id}">Xóa</button>
+            </div>
+          </td>
         `;
         tbody.appendChild(row);
+      });
+
+      // Thêm sự kiện cho các nút sửa và xóa
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = parseInt(this.getAttribute('data-id'));
+          editPerson(id);
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = parseInt(this.getAttribute('data-id'));
+          showDeleteConfirmation(id);
+        });
       });
     }
 
@@ -572,6 +834,171 @@
         document.getElementById('next-lunar-date').textContent = '--';
       }
     }
+
+    // Hiển thị thông báo
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${type} show`;
+      
+      // Ẩn thông báo sau 3 giây
+      setTimeout(() => {
+        notification.className = 'notification';
+      }, 3000);
+    }
+
+    // Mở modal thêm người mới
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Thêm người mới';
+      document.getElementById('personId').value = '';
+      document.getElementById('personName').value = '';
+      document.getElementById('personRelation').value = '';
+      document.getElementById('lunarDay').value = '';
+      document.getElementById('lunarMonth').value = '';
+      document.getElementById('personModal').classList.add('active');
+    }
+
+    // Mở modal sửa thông tin
+    function editPerson(id) {
+      const person = gioList.find(p => p.id === id);
+      if (person) {
+        document.getElementById('modalTitle').textContent = 'Sửa thông tin';
+        document.getElementById('personId').value = person.id;
+        document.getElementById('personName').value = person.name;
+        document.getElementById('personRelation').value = person.relation;
+        
+        const [day, month] = person.date.split('/').map(Number);
+        document.getElementById('lunarDay').value = day;
+        document.getElementById('lunarMonth').value = month;
+        
+        document.getElementById('personModal').classList.add('active');
+      }
+    }
+
+    // Hiển thị xác nhận xóa
+    function showDeleteConfirmation(id) {
+      const person = gioList.find(p => p.id === id);
+      if (person) {
+        document.getElementById('confirmModal').classList.add('active');
+        
+        // Lưu ID người cần xóa vào nút xác nhận
+        document.getElementById('confirmDeleteBtn').setAttribute('data-id', id);
+      }
+    }
+
+    // Lưu thông tin người
+    function savePerson(event) {
+      event.preventDefault();
+      
+      const id = document.getElementById('personId').value;
+      const name = document.getElementById('personName').value.trim();
+      const relation = document.getElementById('personRelation').value.trim();
+      const lunarDay = parseInt(document.getElementById('lunarDay').value);
+      const lunarMonth = parseInt(document.getElementById('lunarMonth').value);
+      
+      // Kiểm tra dữ liệu
+      if (!name || !relation || isNaN(lunarDay) || isNaN(lunarMonth)) {
+        showNotification('Vui lòng điền đầy đủ thông tin', 'error');
+        return;
+      }
+      
+      if (lunarDay < 1 || lunarDay > 31 || lunarMonth < 1 || lunarMonth > 12) {
+        showNotification('Ngày hoặc tháng không hợp lệ', 'error');
+        return;
+      }
+      
+      // Format ngày âm lịch
+      const date = `${String(lunarDay).padStart(2, '0')}/${String(lunarMonth).padStart(2, '0')}`;
+      
+      if (id) {
+        // Cập nhật thông tin người đã có
+        const index = gioList.findIndex(p => p.id === parseInt(id));
+        if (index !== -1) {
+          gioList[index] = {
+            ...gioList[index],
+            name,
+            relation,
+            date
+          };
+          showNotification('Đã cập nhật thông tin thành công');
+        }
+      } else {
+        // Thêm người mới
+        const newId = gioList.length > 0 ? Math.max(...gioList.map(p => p.id)) + 1 : 1;
+        gioList.push({
+          id: newId,
+          name,
+          relation,
+          date
+        });
+        showNotification('Đã thêm người mới thành công');
+      }
+      
+      // Lưu vào localStorage
+      localStorage.setItem('gioList', JSON.stringify(gioList));
+      
+      // Đóng modal
+      document.getElementById('personModal').classList.remove('active');
+      
+      // Cập nhật lại bảng và đếm ngược
+      initializeTable();
+      updateCountdown();
+    }
+
+    // Xóa người
+    function deletePerson(id) {
+      const index = gioList.findIndex(p => p.id === id);
+      if (index !== -1) {
+        gioList.splice(index, 1);
+        
+        // Lưu vào localStorage
+        localStorage.setItem('gioList', JSON.stringify(gioList));
+        
+        showNotification('Đã xóa thành công');
+        
+        // Cập nhật lại bảng và đếm ngược
+        initializeTable();
+        updateCountdown();
+      }
+      
+      // Đóng modal xác nhận
+      document.getElementById('confirmModal').classList.remove('active');
+    }
+
+    // Khởi tạo trang và cập nhật mỗi giây
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeTable();
+      updateCurrentTime(); // Cập nhật thời gian hiện tại ngay lập tức
+      updateCountdown(); // Cập nhật đếm ngược ngay lập tức
+      
+      // Cập nhật cả thời gian hiện tại và đếm ngược mỗi giây
+      setInterval(() => {
+        updateCurrentTime();
+        updateCountdown();
+      }, 1000);
+      
+      // Thêm sự kiện cho các nút và form
+      document.getElementById('addPersonBtn').addEventListener('click', openAddModal);
+      document.getElementById('closeModal').addEventListener('click', () => {
+        document.getElementById('personModal').classList.remove('active');
+      });
+      document.getElementById('cancelBtn').addEventListener('click', () => {
+        document.getElementById('personModal').classList.remove('active');
+      });
+      document.getElementById('personForm').addEventListener('submit', savePerson);
+      
+      // Sự kiện cho modal xác nhận xóa
+      document.getElementById('closeConfirmModal').addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('active');
+      });
+      document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('active');
+      });
+      document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        const id = parseInt(this.getAttribute('data-id'));
+        deletePerson(id);
+      });
+    });
   </script>
 </body>
 </html>
