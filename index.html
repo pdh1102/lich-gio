@@ -305,6 +305,24 @@
       background-color: rgba(255, 255, 255, 0.05);
     }
 
+    .auth-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+
+    .auth-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--danger-color);
+    }
+
+    .auth-indicator.logged-in {
+      background-color: var(--success-color);
+    }
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
       body {
@@ -384,7 +402,10 @@
       <div class="card" style="grid-column: 1 / -1;">
         <h2 class="card-title">
           Danh sách ngày giỗ
-          <button id="addPersonBtn" class="btn btn-primary btn-sm">Thêm mới</button>
+          <div class="auth-status">
+            <div id="authIndicator" class="auth-indicator"></div>
+            <button id="authButton" class="btn btn-secondary btn-sm">Đăng nhập</button>
+          </div>
         </h2>
         <div class="table-container">
           <table style="width: 100%; border-collapse: collapse;">
@@ -462,6 +483,50 @@
     </div>
   </div>
 
+  <!-- Modal đăng nhập -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Đăng nhập quản trị</h3>
+        <button class="modal-close" id="closeLoginModal">&times;</button>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="password" class="form-label">Mật khẩu</label>
+          <input type="password" id="password" class="form-input" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelLoginBtn">Hủy</button>
+          <button type="submit" class="btn btn-primary">Đăng nhập</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal thiết lập mật khẩu -->
+  <div id="setupPasswordModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Thiết lập mật khẩu quản trị</h3>
+        <button class="modal-close" id="closeSetupModal">&times;</button>
+      </div>
+      <form id="setupPasswordForm">
+        <div class="form-group">
+          <label for="newPassword" class="form-label">Mật khẩu mới</label>
+          <input type="password" id="newPassword" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
+          <input type="password" id="confirmPassword" class="form-input" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelSetupBtn">Hủy</button>
+          <button type="submit" class="btn btn-primary">Thiết lập</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal thêm/sửa người -->
   <div id="personModal" class="modal">
     <div class="modal-content">
@@ -534,6 +599,56 @@
     // Lưu danh sách vào localStorage nếu chưa có
     if (!localStorage.getItem('gioList')) {
       localStorage.setItem('gioList', JSON.stringify(gioList));
+    }
+
+    // Biến lưu trạng thái đăng nhập
+    let isLoggedIn = false;
+
+    // Hàm mã hóa đơn giản (không an toàn cho môi trường sản xuất)
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return hash.toString(16);
+    }
+
+    // Kiểm tra xem đã có mật khẩu chưa
+    function hasPassword() {
+      return localStorage.getItem('adminPasswordHash') !== null;
+    }
+
+    // Kiểm tra mật khẩu
+    function checkPassword(password) {
+      const storedHash = localStorage.getItem('adminPasswordHash');
+      return simpleHash(password) === storedHash;
+    }
+
+    // Thiết lập mật khẩu mới
+    function setPassword(password) {
+      const hash = simpleHash(password);
+      localStorage.setItem('adminPasswordHash', hash);
+    }
+
+    // Cập nhật trạng thái đăng nhập
+    function updateAuthStatus() {
+      const authIndicator = document.getElementById('authIndicator');
+      const authButton = document.getElementById('authButton');
+      
+      if (isLoggedIn) {
+        authIndicator.classList.add('logged-in');
+        authButton.textContent = 'Đăng xuất';
+        document.getElementById('addPersonBtn').style.display = 'block';
+      } else {
+        authIndicator.classList.remove('logged-in');
+        authButton.textContent = 'Đăng nhập';
+        document.getElementById('addPersonBtn').style.display = 'none';
+      }
+      
+      // Cập nhật bảng để hiển thị/ẩn các nút thao tác
+      initializeTable();
     }
 
     // Hàm chuyển đổi dương lịch sang âm lịch
@@ -755,29 +870,33 @@
           <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.relation}</td>
           <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.date}</td>
           <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center;">
-            <div class="action-buttons">
-              <button class="btn btn-secondary btn-sm edit-btn" data-id="${person.id}">Sửa</button>
-              <button class="btn btn-danger btn-sm delete-btn" data-id="${person.id}">Xóa</button>
-            </div>
+            ${isLoggedIn ? `
+              <div class="action-buttons">
+                <button class="btn btn-secondary btn-sm edit-btn" data-id="${person.id}">Sửa</button>
+                <button class="btn btn-danger btn-sm delete-btn" data-id="${person.id}">Xóa</button>
+              </div>
+            ` : ''}
           </td>
         `;
         tbody.appendChild(row);
       });
 
-      // Thêm sự kiện cho các nút sửa và xóa
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const id = parseInt(this.getAttribute('data-id'));
-          editPerson(id);
+      // Thêm sự kiện cho các nút sửa và xóa nếu đã đăng nhập
+      if (isLoggedIn) {
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = parseInt(this.getAttribute('data-id'));
+            editPerson(id);
+          });
         });
-      });
 
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const id = parseInt(this.getAttribute('data-id'));
-          showDeleteConfirmation(id);
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = parseInt(this.getAttribute('data-id'));
+            showDeleteConfirmation(id);
+          });
         });
-      });
+      }
     }
 
     // Cập nhật đồng hồ đếm ngược
@@ -849,6 +968,11 @@
 
     // Mở modal thêm người mới
     function openAddModal() {
+      if (!isLoggedIn) {
+        showNotification('Bạn cần đăng nhập để thực hiện chức năng này', 'error');
+        return;
+      }
+      
       document.getElementById('modalTitle').textContent = 'Thêm người mới';
       document.getElementById('personId').value = '';
       document.getElementById('personName').value = '';
@@ -860,6 +984,11 @@
 
     // Mở modal sửa thông tin
     function editPerson(id) {
+      if (!isLoggedIn) {
+        showNotification('Bạn cần đăng nhập để thực hiện chức năng này', 'error');
+        return;
+      }
+      
       const person = gioList.find(p => p.id === id);
       if (person) {
         document.getElementById('modalTitle').textContent = 'Sửa thông tin';
@@ -877,6 +1006,11 @@
 
     // Hiển thị xác nhận xóa
     function showDeleteConfirmation(id) {
+      if (!isLoggedIn) {
+        showNotification('Bạn cần đăng nhập để thực hiện chức năng này', 'error');
+        return;
+      }
+      
       const person = gioList.find(p => p.id === id);
       if (person) {
         document.getElementById('confirmModal').classList.add('active');
@@ -889,6 +1023,11 @@
     // Lưu thông tin người
     function savePerson(event) {
       event.preventDefault();
+      
+      if (!isLoggedIn) {
+        showNotification('Bạn cần đăng nhập để thực hiện chức năng này', 'error');
+        return;
+      }
       
       const id = document.getElementById('personId').value;
       const name = document.getElementById('personName').value.trim();
@@ -947,6 +1086,11 @@
 
     // Xóa người
     function deletePerson(id) {
+      if (!isLoggedIn) {
+        showNotification('Bạn cần đăng nhập để thực hiện chức năng này', 'error');
+        return;
+      }
+      
       const index = gioList.findIndex(p => p.id === id);
       if (index !== -1) {
         gioList.splice(index, 1);
@@ -965,8 +1109,76 @@
       document.getElementById('confirmModal').classList.remove('active');
     }
 
+    // Xử lý đăng nhập
+    function handleLogin(event) {
+      event.preventDefault();
+      
+      const password = document.getElementById('password').value;
+      
+      if (checkPassword(password)) {
+        isLoggedIn = true;
+        updateAuthStatus();
+        document.getElementById('loginModal').classList.remove('active');
+        showNotification('Đăng nhập thành công');
+      } else {
+        showNotification('Mật khẩu không đúng', 'error');
+      }
+    }
+
+    // Xử lý đăng xuất
+    function handleLogout() {
+      isLoggedIn = false;
+      updateAuthStatus();
+      showNotification('Đã đăng xuất');
+    }
+
+    // Xử lý thiết lập mật khẩu
+    function handleSetupPassword(event) {
+      event.preventDefault();
+      
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (newPassword !== confirmPassword) {
+        showNotification('Mật khẩu xác nhận không khớp', 'error');
+        return;
+      }
+      
+      if (newPassword.length < 4) {
+        showNotification('Mật khẩu phải có ít nhất 4 ký tự', 'error');
+        return;
+      }
+      
+      setPassword(newPassword);
+      document.getElementById('setupPasswordModal').classList.remove('active');
+      showNotification('Đã thiết lập mật khẩu thành công');
+      
+      // Tự động đăng nhập sau khi thiết lập mật khẩu
+      isLoggedIn = true;
+      updateAuthStatus();
+    }
+
+    // Xử lý nút đăng nhập/đăng xuất
+    function handleAuthButton() {
+      if (isLoggedIn) {
+        handleLogout();
+      } else {
+        if (hasPassword()) {
+          document.getElementById('loginModal').classList.add('active');
+        } else {
+          document.getElementById('setupPasswordModal').classList.add('active');
+        }
+      }
+    }
+
     // Khởi tạo trang và cập nhật mỗi giây
     document.addEventListener('DOMContentLoaded', () => {
+      // Ẩn nút thêm mới ban đầu
+      document.getElementById('addPersonBtn').style.display = 'none';
+      
+      // Cập nhật trạng thái đăng nhập
+      updateAuthStatus();
+      
       initializeTable();
       updateCurrentTime(); // Cập nhật thời gian hiện tại ngay lập tức
       updateCountdown(); // Cập nhật đếm ngược ngay lập tức
@@ -997,6 +1209,25 @@
       document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
         const id = parseInt(this.getAttribute('data-id'));
         deletePerson(id);
+      });
+      
+      // Sự kiện cho đăng nhập/đăng xuất
+      document.getElementById('authButton').addEventListener('click', handleAuthButton);
+      document.getElementById('loginForm').addEventListener('submit', handleLogin);
+      document.getElementById('closeLoginModal').addEventListener('click', () => {
+        document.getElementById('loginModal').classList.remove('active');
+      });
+      document.getElementById('cancelLoginBtn').addEventListener('click', () => {
+        document.getElementById('loginModal').classList.remove('active');
+      });
+      
+      // Sự kiện cho thiết lập mật khẩu
+      document.getElementById('setupPasswordForm').addEventListener('submit', handleSetupPassword);
+      document.getElementById('closeSetupModal').addEventListener('click', () => {
+        document.getElementById('setupPasswordModal').classList.remove('active');
+      });
+      document.getElementById('cancelSetupBtn').addEventListener('click', () => {
+        document.getElementById('setupPasswordModal').classList.remove('active');
       });
     });
   </script>
