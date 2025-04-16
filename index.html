@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Lịch giỗ - Theo dõi và nhắc nhở các ngày giỗ trong gia đình" />
+  <meta name="description" content="Lịch giỗ- Theo dõi và nhắc nhở các ngày giỗ trong gia đình" />
   <meta name="keywords" content="lịch giỗ, gia đình, ngày giỗ, âm lịch" />
   <meta name="author" content="Hưng" />
   <meta property="og:title" content="Lịch giỗ" />
@@ -462,7 +462,7 @@
 
       <!-- Thông tin ngày giỗ -->
       <div class="card">
-        <h2 class="card-title">Thông tin </h2>
+        <h2 class="card-title">Thông tin</h2>
         <div class="info-item">
           <div class="info-label">NGƯỜI GIỖ</div>
           <div class="info-value" id="next-person">--</div>
@@ -561,7 +561,7 @@
   </div>
 
   <footer>
-    &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
+    &copy; 2025 Lịch giỗ gia đình | By Hưng ❤️
   </footer>
   <script>
     // Khởi tạo danh sách ngày giỗ từ localStorage hoặc dùng danh sách mặc định
@@ -898,23 +898,18 @@
         // Hiển thị ngày âm lịch
         document.getElementById('next-lunar-date').textContent = 
           `${result.lunarDay}/${result.lunarMonth}/${result.lunarYear}`;
-
-        // Nếu đã qua ngày giỗ, cập nhật lại sau 1 giây
-        if (diff < 0) {
-          setTimeout(updateCountdown, 1000);
-        }
-      } else {
-        // Nếu không tìm thấy ngày giỗ nào trong tương lai
-        document.getElementById('days').textContent = '--';
-        document.getElementById('hours').textContent = '--';
-        document.getElementById('minutes').textContent = '--';
-        document.getElementById('seconds').textContent = '--';
-        document.getElementById('next-person').textContent = 'Không có ngày giỗ nào sắp tới';
-        document.getElementById('next-relation').textContent = '--';
-        document.getElementById('next-solar-date').textContent = '--';
-        document.getElementById('next-lunar-date').textContent = '--';
-      }
-    }
+  } else {
+    // Nếu không tìm thấy ngày giỗ nào trong tương lai
+    document.getElementById('days').textContent = '--';
+    document.getElementById('hours').textContent = '--';
+    document.getElementById('minutes').textContent = '--';
+    document.getElementById('seconds').textContent = '--';
+    document.getElementById('next-person').textContent = 'Không có ngày giỗ nào sắp tới';
+    document.getElementById('next-relation').textContent = '--';
+    document.getElementById('next-solar-date').textContent = '--';
+    document.getElementById('next-lunar-date').textContent = '--';
+  }
+}
 
     // Hiển thị thông báo
     function showNotification(message, type = 'success') {
@@ -1124,14 +1119,16 @@
       updateAuthStatus();
       
       initializeTable();
-      updateCurrentTime(); // Cập nhật thời gian hiện tại ngay lập tức
-      updateCountdown(); // Cập nhật đếm ngược ngay lập tức
       
-      // Cập nhật cả thời gian hiện tại và đếm ngược mỗi giây
-      setInterval(() => {
-        updateCurrentTime();
-        updateCountdown();
-      }, 1000);
+      // Cập nhật cả thời gian hiện tại và đếm ngược ngay lập tức
+      updateCurrentTime();
+      updateCountdown();
+
+      // Cập nhật thời gian hiện tại mỗi giây
+      setInterval(updateCurrentTime, 1000);
+
+      // Cập nhật đếm ngược mỗi giây
+      setInterval(updateCountdown, 1000);
       
       // Thêm sự kiện cho các nút và form
       document.getElementById('addPersonBtn').addEventListener('click', openAddModal);
