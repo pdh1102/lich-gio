@@ -13,7 +13,7 @@
   <meta property="og:image" content="https://pdh1102.github.io/lich-gio/og-image.jpg" />
   <link rel="icon" type="image/png" href="favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>Lịch giỗ</title>
+  <title>Lịch giỗ tộc họ</title>
   <style>
     :root {
       --primary-color: #ff6b35;
@@ -347,6 +347,52 @@
 
       .card-title {
         font-size: 1rem;
+        color: #2ec4b6;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+      }
+      
+      th {
+        padding: 0.5rem 0.25rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-secondary);
+        font-weight: normal;
+        font-size: 0.75rem;
+      }
+      
+      td {
+        padding: 0.5rem 0.25rem;
+        border-bottom: 1px solid rgba(20, 20, 20, 0.8);
+        font-size: 0.8rem;
+      }
+      
+      tr:nth-child(odd) {
+        background-color: rgba(30, 30, 30, 0.4);
+      }
+      
+      tr:nth-child(even) {
+        background-color: rgba(40, 40, 40, 0.4);
+      }
+      
+      .btn-sm {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.7rem;
+      }
+      
+      h1 {
+        font-size: 1.5rem !important;
+        margin-bottom: 1rem !important;
+      }
+      
+      .auth-status {
+        margin-left: 0.5rem;
       }
 
       .countdown-item {
@@ -444,13 +490,13 @@
           </div>
         </h2>
         <div class="table-container">
-          <table style="width: 100%; border-collapse: collapse;">
+          <table>
             <thead>
               <tr>
-                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">HỌ VÀ TÊN</th>
-                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">QUAN HỆ</th>
-                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">NGÀY GIỖ (ÂM LỊCH)</th>
-                <th style="padding: 1rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--secondary-color);">THAO TÁC</th>
+                <th>HỌ VÀ TÊN</th>
+                <th>QUAN HỆ</th>
+                <th>NGÀY GIỖ (ÂM LỊCH)</th>
+                <th>THAO TÁC</th>
               </tr>
             </thead>
             <tbody id="anniversaryList">
@@ -475,7 +521,7 @@
 
       <!-- Đếm ngược -->
       <div class="card">
-        <h2 class="card-title">Số ngày còn lại</h2>
+        <h2 class="card-title">Ngày giỗ tiếp theo</h2>
         <div class="countdown-container">
           <div class="countdown-item">
             <div class="countdown-value" id="days">--</div>
@@ -856,10 +902,10 @@
       gioList.forEach(person => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.name}</td>
-          <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.relation}</td>
-          <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">${person.date}</td>
-          <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center;">
+          <td>${person.name}</td>
+          <td>${person.relation}</td>
+          <td>${person.date}</td>
+          <td style="text-align: center;">
             ${isLoggedIn ? `
               <div class="action-buttons">
                 <button class="btn btn-secondary btn-sm edit-btn" data-id="${person.id}">Sửa</button>
