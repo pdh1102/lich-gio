@@ -13,7 +13,7 @@
   <meta property="og:image" content="https://pdh1102.github.io/lich-gio/og-image.jpg" />
   <link rel="icon" type="image/png" href="favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>Lịch giỗ tộc họ</title>
+  <title>Lịch giỗ</title>
   <style>
     :root {
       --primary-color: #ff6b35;
@@ -85,28 +85,31 @@
     }
 
     .countdown-container {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       text-align: center;
     }
 
     .countdown-item {
       background-color: rgba(255, 255, 255, 0.1);
-      padding: 1rem;
+      padding: 1.5rem;
       border-radius: 0.5rem;
+      width: 100%;
+      max-width: 200px;
     }
 
     .countdown-value {
-      font-size: 2rem;
+      font-size: 3rem;
       font-weight: bold;
       color: var(--primary-color);
     }
 
     .countdown-label {
-      font-size: 0.875rem;
+      font-size: 1rem;
       color: var(--text-secondary);
       text-transform: uppercase;
+      margin-top: 0.5rem;
     }
 
     .info-item {
@@ -326,7 +329,11 @@
     /* Mobile Responsive */
     @media (max-width: 768px) {
       body {
-        padding: 1rem;
+        padding: 0.5rem;
+      }
+
+      .container {
+        padding: 0.5rem;
       }
 
       .grid-container {
@@ -334,54 +341,83 @@
         gap: 1rem;
       }
 
-      .countdown-container {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.5rem;
+      .card {
+        padding: 1rem;
+      }
+
+      .card-title {
+        font-size: 1rem;
       }
 
       .countdown-item {
-        padding: 0.5rem;
+        padding: 1rem;
       }
 
       .countdown-value {
-        font-size: 1.25rem;
+        font-size: 2.5rem;
       }
 
       .countdown-label {
-        font-size: 0.75rem;
+        font-size: 0.875rem;
       }
 
       .time-display {
         font-size: 1.5rem;
       }
 
-      .card {
-        padding: 1rem;
-      }
-
       .modal-content {
         padding: 1rem;
         width: 95%;
       }
+
+      /* Điều chỉnh bảng cho mobile */
+      th, td {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
     }
 
     /* Small Mobile Devices */
-    @media (max-width: 375px) {
-      .countdown-container {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.25rem;
+    @media (max-width: 480px) {
+      body {
+        padding: 0.25rem;
+      }
+
+      .container {
+        padding: 0.25rem;
       }
 
       .countdown-value {
-        font-size: 1rem;
+        font-size: 2rem;
       }
 
       .countdown-label {
-        font-size: 0.65rem;
+        font-size: 0.75rem;
       }
 
       .countdown-item {
-        padding: 0.25rem;
+        padding: 0.75rem;
+      }
+
+      /* Điều chỉnh bảng cho small mobile */
+      th, td {
+        padding: 0.4rem;
+        font-size: 0.75rem;
+      }
+
+      .btn-sm {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.7rem;
       }
     }
 
@@ -439,23 +475,11 @@
 
       <!-- Đếm ngược -->
       <div class="card">
-        <h2 class="card-title">Ngày giỗ tiếp theo</h2>
+        <h2 class="card-title">Số ngày còn lại</h2>
         <div class="countdown-container">
           <div class="countdown-item">
             <div class="countdown-value" id="days">--</div>
             <div class="countdown-label">NGÀY</div>
-          </div>
-          <div class="countdown-item">
-            <div class="countdown-value" id="hours">--</div>
-            <div class="countdown-label">GIỜ</div>
-          </div>
-          <div class="countdown-item">
-            <div class="countdown-value" id="minutes">--</div>
-            <div class="countdown-label">PHÚT</div>
-          </div>
-          <div class="countdown-item">
-            <div class="countdown-value" id="seconds">--</div>
-            <div class="countdown-label">GIÂY</div>
           </div>
         </div>
       </div>
@@ -561,7 +585,7 @@
   </div>
 
   <footer>
-    &copy; 2025 Lịch giỗ gia đình | By Hưng ❤️
+    &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
   <script>
     // Khởi tạo danh sách ngày giỗ từ localStorage hoặc dùng danh sách mặc định
@@ -773,54 +797,54 @@
     }
 
     // Tìm ngày giỗ tiếp theo
-function findNextAnniversary() {
-  try {
-    const now = new Date();
-    const currentLunar = solarToLunar(now);
-    
-    let nearestDate = null;
-    let minDiff = Infinity;
-    
-    // Tạo một bản sao của ngày hiện tại để tìm kiếm
-    const searchDate = new Date(now);
-    
-    // Tìm kiếm trong khoảng 400 ngày tới (hơn 1 năm)
-    for (let i = 0; i < 400; i++) {
-      // Tăng ngày tìm kiếm lên 1
-      searchDate.setDate(searchDate.getDate() + 1);
-      
-      // Chuyển đổi sang âm lịch
-      const lunarDate = solarToLunar(searchDate);
-      
-      // Kiểm tra xem có trùng với ngày giỗ nào không
-      for (const person of gioList) {
-        const [lunarDay, lunarMonth] = person.date.split('/').map(Number);
+    function findNextAnniversary() {
+      try {
+        const now = new Date();
+        const currentLunar = solarToLunar(now);
         
-        if (lunarDate.day === lunarDay && lunarDate.month === lunarMonth) {
-          // Tính khoảng cách thời gian
-          const diff = searchDate.getTime() - now.getTime();
+        let nearestDate = null;
+        let minDiff = Infinity;
+        
+        // Tạo một bản sao của ngày hiện tại để tìm kiếm
+        const searchDate = new Date(now);
+        
+        // Tìm kiếm trong khoảng 400 ngày tới (hơn 1 năm)
+        for (let i = 0; i < 400; i++) {
+          // Tăng ngày tìm kiếm lên 1
+          searchDate.setDate(searchDate.getDate() + 1);
           
-          // Nếu là ngày gần nhất
-          if (diff < minDiff && diff > 0) {
-            minDiff = diff;
-            nearestDate = {
-              date: new Date(searchDate),
-              person: person,
-              lunarDay: lunarDay,
-              lunarMonth: lunarMonth,
-              lunarYear: lunarDate.year
-            };
+          // Chuyển đổi sang âm lịch
+          const lunarDate = solarToLunar(searchDate);
+          
+          // Kiểm tra xem có trùng với ngày giỗ nào không
+          for (const person of gioList) {
+            const [lunarDay, lunarMonth] = person.date.split('/').map(Number);
+            
+            if (lunarDate.day === lunarDay && lunarDate.month === lunarMonth) {
+              // Tính khoảng cách thời gian
+              const diff = searchDate.getTime() - now.getTime();
+              
+              // Nếu là ngày gần nhất
+              if (diff < minDiff && diff > 0) {
+                minDiff = diff;
+                nearestDate = {
+                  date: new Date(searchDate),
+                  person: person,
+                  lunarDay: lunarDay,
+                  lunarMonth: lunarMonth,
+                  lunarYear: lunarDate.year
+                };
+              }
+            }
           }
         }
+        
+        return nearestDate;
+      } catch (error) {
+        console.error("Error in findNextAnniversary:", error);
+        return null;
       }
     }
-    
-    return nearestDate;
-  } catch (error) {
-    console.error("Error in findNextAnniversary:", error);
-    return null;
-  }
-}
 
     // Khởi tạo bảng
     function initializeTable() {
@@ -866,64 +890,50 @@ function findNextAnniversary() {
     }
 
     // Cập nhật đồng hồ đếm ngược
-function updateCountdown() {
-  try {
-    const now = new Date();
-    console.log("Current time:", now);
-    
-    // Tìm ngày giỗ tiếp theo
-    const result = findNextAnniversary();
-    console.log("Next anniversary:", result);
-    
-    if (result) {
-      // Tính khoảng cách thời gian
-      const diff = result.date.getTime() - now.getTime();
-      console.log("Time difference (ms):", diff);
-      
-      // Tính toán thời gian còn lại
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      
-      console.log("Countdown:", days, hours, minutes, seconds);
-      
-      // Cập nhật đồng hồ
-      document.getElementById('days').textContent = Math.max(0, days);
-      document.getElementById('hours').textContent = String(Math.max(0, hours)).padStart(2, '0');
-      document.getElementById('minutes').textContent = String(Math.max(0, minutes)).padStart(2, '0');
-      document.getElementById('seconds').textContent = String(Math.max(0, seconds)).padStart(2, '0');
-      
-      // Cập nhật thông tin ngày giỗ
-      document.getElementById('next-person').textContent = result.person.name;
-      document.getElementById('next-relation').textContent = result.person.relation;
-      
-      // Định dạng ngày dương lịch
-      const solarDateStr = result.date.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-      document.getElementById('next-solar-date').textContent = solarDateStr;
-      
-      // Hiển thị ngày âm lịch
-      document.getElementById('next-lunar-date').textContent = 
-        `${result.lunarDay}/${result.lunarMonth}/${result.lunarYear}`;
-    } else {
-      // Nếu không tìm thấy ngày giỗ nào trong tương lai
-      document.getElementById('days').textContent = '--';
-      document.getElementById('hours').textContent = '--';
-      document.getElementById('minutes').textContent = '--';
-      document.getElementById('seconds').textContent = '--';
-      document.getElementById('next-person').textContent = 'Không có ngày giỗ nào sắp tới';
-      document.getElementById('next-relation').textContent = '--';
-      document.getElementById('next-solar-date').textContent = '--';
-      document.getElementById('next-lunar-date').textContent = '--';
+    function updateCountdown() {
+      try {
+        const now = new Date();
+        
+        // Tìm ngày giỗ tiếp theo
+        const result = findNextAnniversary();
+        
+        if (result) {
+          // Tính khoảng cách thời gian
+          const diff = result.date.getTime() - now.getTime();
+          
+          // Tính toán số ngày còn lại
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          
+          // Cập nhật đồng hồ - chỉ hiển thị ngày
+          document.getElementById('days').textContent = Math.max(0, days);
+          
+          // Cập nhật thông tin ngày giỗ
+          document.getElementById('next-person').textContent = result.person.name;
+          document.getElementById('next-relation').textContent = result.person.relation;
+          
+          // Định dạng ngày dương lịch
+          const solarDateStr = result.date.toLocaleString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          document.getElementById('next-solar-date').textContent = solarDateStr;
+          
+          // Hiển thị ngày âm lịch
+          document.getElementById('next-lunar-date').textContent = 
+            `${result.lunarDay}/${result.lunarMonth}/${result.lunarYear}`;
+        } else {
+          // Nếu không tìm thấy ngày giỗ nào trong tương lai
+          document.getElementById('days').textContent = '--';
+          document.getElementById('next-person').textContent = 'Không có ngày giỗ nào sắp tới';
+          document.getElementById('next-relation').textContent = '--';
+          document.getElementById('next-solar-date').textContent = '--';
+          document.getElementById('next-lunar-date').textContent = '--';
+        }
+      } catch (error) {
+        console.error("Error in updateCountdown:", error);
+      }
     }
-  } catch (error) {
-    console.error("Error in updateCountdown:", error);
-  }
-}
 
     // Hiển thị thông báo
     function showNotification(message, type = 'success') {
@@ -1117,67 +1127,67 @@ function updateCountdown() {
     }
 
     // Khởi tạo trang và cập nhật mỗi giây
-document.addEventListener('DOMContentLoaded', () => {
-  // Thêm nút thêm mới (bị thiếu trong HTML)
-  const cardTitle = document.querySelector('.card-title');
-  if (!document.getElementById('addPersonBtn')) {
-    const addButton = document.createElement('button');
-    addButton.id = 'addPersonBtn';
-    addButton.className = 'btn btn-primary btn-sm';
-    addButton.textContent = 'Thêm mới';
-    addButton.style.display = 'none';
-    cardTitle.insertBefore(addButton, cardTitle.querySelector('.auth-status'));
-  }
-  
-  // Cập nhật trạng thái đăng nhập
-  updateAuthStatus();
-  
-  initializeTable();
-  
-  // Cập nhật thời gian hiện tại ngay lập tức
-  updateCurrentTime();
-  
-  // Cập nhật đếm ngược ngay lập tức
-  updateCountdown();
-  
-  // Cập nhật thời gian hiện tại mỗi giây
-  setInterval(updateCurrentTime, 1000);
-  
-  // Cập nhật đếm ngược mỗi giây
-  setInterval(updateCountdown, 1000);
-  
-  // Thêm sự kiện cho các nút và form
-  document.getElementById('addPersonBtn').addEventListener('click', openAddModal);
-  document.getElementById('closeModal').addEventListener('click', () => {
-    document.getElementById('personModal').classList.remove('active');
-  });
-  document.getElementById('cancelBtn').addEventListener('click', () => {
-    document.getElementById('personModal').classList.remove('active');
-  });
-  document.getElementById('personForm').addEventListener('submit', savePerson);
-  
-  // Sự kiện cho modal xác nhận xóa
-  document.getElementById('closeConfirmModal').addEventListener('click', () => {
-    document.getElementById('confirmModal').classList.remove('active');
-  });
-  document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
-    document.getElementById('confirmModal').classList.remove('active');
-  });
-  document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-    const id = parseInt(this.getAttribute('data-id'));
-    deletePerson(id);
-  });
-  
-  // Sự kiện cho đăng nhập/đăng xuất
-  document.getElementById('authButton').addEventListener('click', handleAuthButton);
-  document.getElementById('loginForm').addEventListener('submit', handleLogin);
-  document.getElementById('closeLoginModal').addEventListener('click', () => {
-    document.getElementById('loginModal').classList.remove('active');
-  });
-  document.getElementById('cancelLoginBtn').addEventListener('click', () => {
-    document.getElementById('loginModal').classList.remove('active');
-  });
-});
+    document.addEventListener('DOMContentLoaded', () => {
+      // Thêm nút thêm mới (bị thiếu trong HTML)
+      const cardTitle = document.querySelector('.card-title');
+      if (!document.getElementById('addPersonBtn')) {
+        const addButton = document.createElement('button');
+        addButton.id = 'addPersonBtn';
+        addButton.className = 'btn btn-primary btn-sm';
+        addButton.textContent = 'Thêm mới';
+        addButton.style.display = 'none';
+        cardTitle.insertBefore(addButton, cardTitle.querySelector('.auth-status'));
+      }
+      
+      // Cập nhật trạng thái đăng nhập
+      updateAuthStatus();
+      
+      initializeTable();
+      
+      // Cập nhật thời gian hiện tại ngay lập tức
+      updateCurrentTime();
+      
+      // Cập nhật đếm ngược ngay lập tức
+      updateCountdown();
+      
+      // Cập nhật thời gian hiện tại mỗi giây
+      setInterval(updateCurrentTime, 1000);
+      
+      // Cập nhật đếm ngược mỗi giây
+      setInterval(updateCountdown, 1000);
+      
+      // Thêm sự kiện cho các nút và form
+      document.getElementById('addPersonBtn').addEventListener('click', openAddModal);
+      document.getElementById('closeModal').addEventListener('click', () => {
+        document.getElementById('personModal').classList.remove('active');
+      });
+      document.getElementById('cancelBtn').addEventListener('click', () => {
+        document.getElementById('personModal').classList.remove('active');
+      });
+      document.getElementById('personForm').addEventListener('submit', savePerson);
+      
+      // Sự kiện cho modal xác nhận xóa
+      document.getElementById('closeConfirmModal').addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('active');
+      });
+      document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('active');
+      });
+      document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        const id = parseInt(this.getAttribute('data-id'));
+        deletePerson(id);
+      });
+      
+      // Sự kiện cho đăng nhập/đăng xuất
+      document.getElementById('authButton').addEventListener('click', handleAuthButton);
+      document.getElementById('loginForm').addEventListener('submit', handleLogin);
+      document.getElementById('closeLoginModal').addEventListener('click', () => {
+        document.getElementById('loginModal').classList.remove('active');
+      });
+      document.getElementById('cancelLoginBtn').addEventListener('click', () => {
+        document.getElementById('loginModal').classList.remove('active');
+      });
+    });
   </script>
 </body>
 </html>
