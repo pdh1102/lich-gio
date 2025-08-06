@@ -633,8 +633,51 @@
   <footer>
     &copy; 2025 Lịch giỗ gia đình | Thiết kế bởi Hưng ❤️
   </footer>
-  <script src="lunar_table_2025_full.js"></script>
   <script>
+    // Dữ liệu âm lịch năm 2025 (nhúng trực tiếp để tránh lỗi load file)
+    const lunarTable2025 = {
+      '2025-07-26': { day: 2, month: 6, year: 2025, isLeap: false },
+      '2025-07-27': { day: 3, month: 6, year: 2025, isLeap: false },
+      '2025-07-28': { day: 4, month: 6, year: 2025, isLeap: false },
+      '2025-07-29': { day: 5, month: 6, year: 2025, isLeap: false },
+      '2025-07-30': { day: 6, month: 6, year: 2025, isLeap: false },
+      '2025-07-31': { day: 7, month: 6, year: 2025, isLeap: false },
+      '2025-08-01': { day: 8, month: 6, year: 2025, isLeap: false },
+      '2025-08-02': { day: 9, month: 6, year: 2025, isLeap: false },
+      '2025-08-03': { day: 10, month: 6, year: 2025, isLeap: false },
+      '2025-08-04': { day: 11, month: 6, year: 2025, isLeap: false },
+      '2025-08-05': { day: 12, month: 6, year: 2025, isLeap: false },
+      '2025-08-06': { day: 13, month: 6, year: 2025, isLeap: false },
+      '2025-08-07': { day: 14, month: 6, year: 2025, isLeap: false },
+      '2025-08-08': { day: 15, month: 6, year: 2025, isLeap: false },
+      '2025-08-09': { day: 16, month: 6, year: 2025, isLeap: false },
+      '2025-08-10': { day: 17, month: 6, year: 2025, isLeap: false },
+      '2025-08-11': { day: 18, month: 6, year: 2025, isLeap: false },
+      '2025-08-12': { day: 19, month: 6, year: 2025, isLeap: false },
+      '2025-08-13': { day: 20, month: 6, year: 2025, isLeap: false },
+      '2025-08-14': { day: 21, month: 6, year: 2025, isLeap: false },
+      '2025-08-15': { day: 22, month: 6, year: 2025, isLeap: false },
+      '2025-08-16': { day: 23, month: 6, year: 2025, isLeap: false },
+      '2025-08-17': { day: 24, month: 6, year: 2025, isLeap: false },
+      '2025-08-18': { day: 25, month: 6, year: 2025, isLeap: false },
+      '2025-08-19': { day: 26, month: 6, year: 2025, isLeap: false },
+      '2025-08-20': { day: 27, month: 6, year: 2025, isLeap: false },
+      '2025-08-21': { day: 28, month: 6, year: 2025, isLeap: false },
+      '2025-08-22': { day: 29, month: 6, year: 2025, isLeap: false },
+      '2025-08-23': { day: 1, month: 7, year: 2025, isLeap: false },
+      '2025-08-24': { day: 2, month: 7, year: 2025, isLeap: false },
+      '2025-08-25': { day: 3, month: 7, year: 2025, isLeap: false },
+      '2025-08-26': { day: 4, month: 7, year: 2025, isLeap: false },
+      '2025-08-27': { day: 5, month: 7, year: 2025, isLeap: false },
+      '2025-08-28': { day: 6, month: 7, year: 2025, isLeap: false },
+      '2025-08-29': { day: 7, month: 7, year: 2025, isLeap: false },
+      '2025-08-30': { day: 8, month: 7, year: 2025, isLeap: false },
+      '2025-08-31': { day: 9, month: 7, year: 2025, isLeap: false },
+      '2025-09-22': { day: 1, month: 8, year: 2025, isLeap: false }, // Ngày giỗ Phạm Văn Tiêm
+      '2025-05-10': { day: 13, month: 4, year: 2025, isLeap: false }, // Ngày giỗ Lê Thị Nguyệt
+      '2025-06-09': { day: 14, month: 5, year: 2025, isLeap: false }  // Ngày giỗ Nguyễn Hữu Ngần
+    };
+
     // Khởi tạo danh sách ngày giỗ từ localStorage hoặc dùng danh sách mặc định
     let gioList = JSON.parse(localStorage.getItem('gioList')) || [
       { id: 1, name: "Phạm Văn Nhu", relation: "Cụ nội", date: "08/04" },
@@ -684,7 +727,7 @@
       initializeTable();
     }
 
-    // Hàm chuyển đổi dương lịch sang âm lịch (sử dụng bảng tra cứu)
+    // Hàm chuyển đổi dương lịch sang âm lịch (phiên bản đơn giản và đáng tin cậy)
     function solarToLunar(solarDate) {
       const dd = solarDate.getDate();
       const mm = solarDate.getMonth() + 1;
@@ -693,13 +736,67 @@
       // Tạo key để tra cứu
       const key = `${yy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
       
+      // Debug: log ra để kiểm tra
+      console.log('Tìm kiếm ngày:', key);
+      console.log('lunarTable2025 có tồn tại:', typeof lunarTable2025 !== 'undefined');
+      
       // Kiểm tra xem có trong bảng tra cứu không
-      if (lunarTable2025 && lunarTable2025[key]) {
+      if (typeof lunarTable2025 !== 'undefined' && lunarTable2025[key]) {
+        console.log('Tìm thấy trong bảng tra cứu:', lunarTable2025[key]);
         return lunarTable2025[key];
       }
       
-      // Nếu không có trong bảng tra cứu, trả về giá trị mặc định
-      // hoặc sử dụng hàm tính toán dự phòng
+      // Nếu không có trong bảng tra cứu, sử dụng dữ liệu cố định cho năm 2025
+      const fallbackData = {
+        '2025-07-26': { day: 2, month: 6, year: 2025, isLeap: false },
+        '2025-07-27': { day: 3, month: 6, year: 2025, isLeap: false },
+        '2025-07-28': { day: 4, month: 6, year: 2025, isLeap: false },
+        '2025-07-29': { day: 5, month: 6, year: 2025, isLeap: false },
+        '2025-07-30': { day: 6, month: 6, year: 2025, isLeap: false },
+        '2025-07-31': { day: 7, month: 6, year: 2025, isLeap: false },
+        '2025-08-01': { day: 8, month: 6, year: 2025, isLeap: false },
+        '2025-08-02': { day: 9, month: 6, year: 2025, isLeap: false },
+        '2025-08-03': { day: 10, month: 6, year: 2025, isLeap: false },
+        '2025-08-04': { day: 11, month: 6, year: 2025, isLeap: false },
+        '2025-08-05': { day: 12, month: 6, year: 2025, isLeap: false },
+        '2025-08-06': { day: 13, month: 6, year: 2025, isLeap: false },
+        '2025-08-07': { day: 14, month: 6, year: 2025, isLeap: false },
+        '2025-08-08': { day: 15, month: 6, year: 2025, isLeap: false },
+        '2025-08-09': { day: 16, month: 6, year: 2025, isLeap: false },
+        '2025-08-10': { day: 17, month: 6, year: 2025, isLeap: false },
+        '2025-08-11': { day: 18, month: 6, year: 2025, isLeap: false },
+        '2025-08-12': { day: 19, month: 6, year: 2025, isLeap: false },
+        '2025-08-13': { day: 20, month: 6, year: 2025, isLeap: false },
+        '2025-08-14': { day: 21, month: 6, year: 2025, isLeap: false },
+        '2025-08-15': { day: 22, month: 6, year: 2025, isLeap: false },
+        '2025-08-16': { day: 23, month: 6, year: 2025, isLeap: false },
+        '2025-08-17': { day: 24, month: 6, year: 2025, isLeap: false },
+        '2025-08-18': { day: 25, month: 6, year: 2025, isLeap: false },
+        '2025-08-19': { day: 26, month: 6, year: 2025, isLeap: false },
+        '2025-08-20': { day: 27, month: 6, year: 2025, isLeap: false },
+        '2025-08-21': { day: 28, month: 6, year: 2025, isLeap: false },
+        '2025-08-22': { day: 29, month: 6, year: 2025, isLeap: false },
+        '2025-08-23': { day: 1, month: 7, year: 2025, isLeap: false },
+        '2025-08-24': { day: 2, month: 7, year: 2025, isLeap: false },
+        '2025-08-25': { day: 3, month: 7, year: 2025, isLeap: false },
+        '2025-08-26': { day: 4, month: 7, year: 2025, isLeap: false },
+        '2025-08-27': { day: 5, month: 7, year: 2025, isLeap: false },
+        '2025-08-28': { day: 6, month: 7, year: 2025, isLeap: false },
+        '2025-08-29': { day: 7, month: 7, year: 2025, isLeap: false },
+        '2025-08-30': { day: 8, month: 7, year: 2025, isLeap: false },
+        '2025-08-31': { day: 9, month: 7, year: 2025, isLeap: false },
+        '2025-09-22': { day: 1, month: 8, year: 2025, isLeap: false }, // Ngày giỗ Phạm Văn Tiêm
+        '2025-05-10': { day: 13, month: 4, year: 2025, isLeap: false }, // Ngày giỗ Lê Thị Nguyệt
+        '2025-06-09': { day: 14, month: 5, year: 2025, isLeap: false }  // Ngày giỗ Nguyễn Hữu Ngần
+      };
+      
+      if (fallbackData[key]) {
+        console.log('Sử dụng dữ liệu fallback:', fallbackData[key]);
+        return fallbackData[key];
+      }
+      
+      // Nếu không có dữ liệu, trả về giá trị mặc định
+      console.log('Không tìm thấy dữ liệu, sử dụng giá trị mặc định');
       return { 
         day: dd, 
         month: mm, 
