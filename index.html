@@ -683,148 +683,192 @@
       initializeTable();
     }
 
-    // Hàm chuyển đổi dương lịch sang âm lịch
-    function solarToLunar(solarDate) {
-      // Các hằng số cần thiết cho việc tính toán
-      const PI = Math.PI;
-      
-      // Hàm tính Julian day: Số ngày kể từ trưa ngày 1/1/4713 TCN
-      function jdFromDate(dd, mm, yy) {
-        const a = Math.floor((14 - mm) / 12);
-        const y = yy + 4800 - a;
-        const m = mm + 12 * a - 3;
-        let jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-        return jd;
-      }
-      
-      // Hàm tính ngày Sóc (New Moon)
-      function getNewMoonDay(k, timeZone) {
-        const T = k / 1236.85; // Time in Julian centuries from 1900 January 0.5
-        const T2 = T * T;
-        const T3 = T2 * T;
-        const dr = PI / 180;
-        let Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
-        Jd1 = Jd1 + 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
-        const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
-        const Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
-        const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
-        let C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * dr * M);
-        C1 = C1 - 0.4068 * Math.sin(Mpr * dr) + 0.0161 * Math.sin(dr * 2 * Mpr);
-        C1 = C1 - 0.0004 * Math.sin(dr * 3 * Mpr);
-        C1 = C1 + 0.0104 * Math.sin(dr * 2 * F) - 0.0051 * Math.sin(dr * (M + Mpr));
-        C1 = C1 - 0.0074 * Math.sin(dr * (M - Mpr)) + 0.0004 * Math.sin(dr * (2 * F + M));
-        C1 = C1 - 0.0004 * Math.sin(dr * (2 * F - M)) - 0.0006 * Math.sin(dr * (2 * F + Mpr));
-        C1 = C1 + 0.0010 * Math.sin(dr * (2 * F - Mpr)) + 0.0005 * Math.sin(dr * (2 * Mpr + M));
-        let deltat;
-        if (T < -11) {
-          deltat = 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3;
-        } else {
-          deltat = -0.000278 + 0.000265 * T + 0.000262 * T2;
+    // Bảng tra cứu ngày âm lịch từ file .ics
+    let lunarCalendarMap = null;
+    let lunarCalendarYear = null;
+
+    // Hàm parse file .ics và tạo map tra cứu
+    async function loadLunarCalendar(year) {
+      // Kiểm tra cache
+      const cacheKey = `lunarCalendar_${year}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const data = JSON.parse(cached);
+          lunarCalendarMap = data.map;
+          lunarCalendarYear = data.year;
+          return;
+        } catch (e) {
+          console.error("Error loading cached calendar:", e);
         }
-        const JdNew = Jd1 + C1 - deltat;
-        return Math.floor(JdNew + 0.5 + timeZone / 24);
       }
-      
-      // Hàm tính vị trí mặt trời
-      function getSunLongitude(jdn, timeZone) {
-        const T = (jdn - 2451545.5 - timeZone / 24) / 36525;
-        const T2 = T * T;
-        const dr = PI / 180;
-        const M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
-        const L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2;
-        let DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M);
-        DL = DL + (0.019993 - 0.000101 * T) * Math.sin(dr * 2 * M) + 0.000290 * Math.sin(dr * 3 * M);
-        const L = L0 + DL;
-        const omega = 125.04 - 1934.136 * T;
-        const Lambda = L - 0.00569 - 0.00478 * Math.sin(dr * omega);
-        return Math.floor(Lambda / 30);
+
+      // Xác định file .ics cần tải
+      let icsFile = '';
+      if (year >= 2011 && year <= 2021) {
+        icsFile = 'data/calender2011-2021.ics';
+      } else if (year >= 2022 && year <= 2032) {
+        icsFile = 'data/calender2022-2032.ics';
+      } else if (year >= 2033 && year <= 2043) {
+        icsFile = 'data/calender2033-2043.ics';
+      } else if (year >= 2044 && year <= 2054) {
+        icsFile = 'data/calender2044-2054.ics';
+      } else if (year >= 2055 && year <= 2065) {
+        icsFile = 'data/calender2055-2065.ics';
+      } else {
+        console.warn(`Năm ${year} không có trong dữ liệu lịch`);
+        return;
       }
-      
-      // Hàm tính tháng 11 âm lịch
-      function getLunarMonth11(yy, timeZone) {
-        const off = jdFromDate(31, 12, yy) - 2415021;
-        const k = Math.floor(off / 29.530588853);
-        let nm = getNewMoonDay(k, timeZone);
-        const sunLong = getSunLongitude(nm, timeZone);
-        if (sunLong >= 9) {
-          nm = getNewMoonDay(k - 1, timeZone);
+
+      try {
+        const response = await fetch(icsFile);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return nm;
+        const text = await response.text();
+        
+        if (!text || text.length < 100) {
+          throw new Error('File content is too short or empty');
+        }
+        
+        // Parse file .ics
+        const map = {};
+        const lines = text.split('\n');
+        let currentDate = null;
+        let inEvent = false;
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          // Bắt đầu event
+          if (line === 'BEGIN:VEVENT') {
+            inEvent = true;
+            currentDate = null;
+            continue;
+          }
+          
+          // Kết thúc event
+          if (line === 'END:VEVENT') {
+            inEvent = false;
+            currentDate = null;
+            continue;
+          }
+          
+          // Chỉ parse trong phạm vi event
+          if (!inEvent) continue;
+          
+          // Tìm DTSTART
+          if (line.startsWith('DTSTART;VALUE=DATE:')) {
+            const dateStr = line.substring(19).trim();
+            if (dateStr.length === 8 && /^\d{8}$/.test(dateStr)) {
+              currentDate = dateStr; // Format: YYYYMMDD
+            }
+          }
+          
+          // Tìm SUMMARY (ngày âm lịch) - phải nằm sau DTSTART trong cùng một VEVENT
+          if (line.startsWith('SUMMARY:') && currentDate) {
+            const lunarStr = line.substring(8).trim();
+            if (lunarStr && /^\d{1,2}\/\d{1,2}$/.test(lunarStr)) {
+              map[currentDate] = lunarStr; // Format: DD/MM
+            }
+            currentDate = null;
+          }
+        }
+        
+        if (Object.keys(map).length === 0) {
+          throw new Error('No valid dates found in calendar file');
+        }
+        
+        console.log(`Loaded ${Object.keys(map).length} dates for year ${year}`);
+        lunarCalendarMap = map;
+        lunarCalendarYear = year;
+        
+        // Lưu vào cache
+        localStorage.setItem(cacheKey, JSON.stringify({ map, year }));
+      } catch (error) {
+        console.error(`Error loading lunar calendar for year ${year}:`, error);
+        console.error(`Trying to load file: ${icsFile}`);
+        
+        // Kiểm tra nếu là lỗi CORS
+        if (error.message && (error.message.includes('CORS') || error.message.includes('Failed to fetch') || error.name === 'TypeError')) {
+          console.error('⚠️ Lỗi CORS: Vui lòng chạy file qua local server!');
+          console.error('Cách 1: Sử dụng Python: python -m http.server 8000');
+          console.error('Cách 2: Sử dụng Live Server extension trong VS Code');
+          console.error('Cách 3: Sử dụng Node.js: npx http-server');
+        }
+        
+        // Nếu không tải được, thử dùng cache cũ
+        const oldCache = localStorage.getItem(`lunarCalendar_${year - 1}`);
+        if (oldCache) {
+          try {
+            const data = JSON.parse(oldCache);
+            console.warn(`Using cached data from previous year`);
+            lunarCalendarMap = data.map;
+            lunarCalendarYear = data.year;
+          } catch (e) {
+            console.error("Error loading old cache:", e);
+          }
+        }
       }
-      
-      // Hàm tính năm nhuận
-      function getLeapMonthOffset(a11, timeZone) {
-        const k = Math.floor((a11 - 2415021.076998695) / 29.530588853 + 0.5);
-        let last = 0;
-        let i = 1;
-        let arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
-        do {
-          last = arc;
-          i++;
-          arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
-        } while (arc != last && i < 14);
-        return i - 1;
-      }
-      
-      // Hàm chuyển đổi dương lịch sang âm lịch
+    }
+
+    // Hàm chuyển đổi dương lịch sang âm lịch sử dụng dữ liệu từ file .ics
+    async function solarToLunar(solarDate) {
       // Lấy ngày, tháng, năm từ Date object theo múi giờ Việt Nam
-      // Sử dụng Intl.DateTimeFormat để đảm bảo lấy đúng ngày theo múi giờ Việt Nam
       const formatter = new Intl.DateTimeFormat('vi-VN', {
         timeZone: 'Asia/Ho_Chi_Minh',
-        day: 'numeric',
-        month: 'numeric',
+        day: '2-digit',
+        month: '2-digit',
         year: 'numeric'
       });
       
       const parts = formatter.formatToParts(solarDate);
-      const dd = parseInt(parts.find(p => p.type === 'day').value);
-      const mm = parseInt(parts.find(p => p.type === 'month').value);
+      const dd = parts.find(p => p.type === 'day').value;
+      const mm = parts.find(p => p.type === 'month').value;
       const yy = parseInt(parts.find(p => p.type === 'year').value);
       
-      const timeZone = 7.0; // Múi giờ Việt Nam (GMT+7)
-      const dayNumber = jdFromDate(dd, mm, yy);
-      const k = Math.floor((dayNumber - 2415021.076998695) / 29.530588853);
-      let monthStart = getNewMoonDay(k + 1, timeZone);
-      if (monthStart > dayNumber) {
-        monthStart = getNewMoonDay(k, timeZone);
+      // Tải lịch cho năm hiện tại nếu chưa có
+      if (lunarCalendarYear !== yy || !lunarCalendarMap) {
+        await loadLunarCalendar(yy);
       }
       
-      let a11 = getLunarMonth11(yy, timeZone);
-      let b11 = a11;
-      let lunarYear;
-      if (a11 >= monthStart) {
-        lunarYear = yy;
-        a11 = getLunarMonth11(yy - 1, timeZone);
-      } else {
-        lunarYear = yy + 1;
-        b11 = getLunarMonth11(yy + 1, timeZone);
-      }
+      // Tạo key để tra cứu: YYYYMMDD
+      const dateKey = `${yy}${String(mm).padStart(2, '0')}${String(dd).padStart(2, '0')}`;
       
-      const lunarDay = Math.max(1, dayNumber - monthStart + 1);
-      const diff = Math.floor((monthStart - a11) / 29);
-      const lunarLeap = 0;
-      let lunarMonth = diff + 11;
-      
-      if (b11 - a11 > 365) {
-        const leapMonthDiff = getLeapMonthOffset(a11, timeZone);
-        if (diff >= leapMonthDiff) {
-          lunarMonth = diff + 10;
+      // Tra cứu trong map
+      if (lunarCalendarMap && lunarCalendarMap[dateKey]) {
+        const lunarStr = lunarCalendarMap[dateKey];
+        const [lunarDay, lunarMonth] = lunarStr.split('/').map(Number);
+        
+        // Tính năm âm lịch
+        // Năm âm lịch thường bắt đầu từ tháng 11 âm lịch của năm dương lịch trước
+        let lunarYear = yy;
+        
+        // Nếu tháng âm lịch >= 11, có thể thuộc năm âm lịch của năm dương lịch hiện tại
+        // Nếu tháng âm lịch < 11 và đang ở đầu năm dương lịch (tháng 1-2), có thể thuộc năm âm lịch trước
+        if (lunarMonth < 11 && parseInt(mm) <= 2) {
+          // Kiểm tra ngày 1/1 của năm hiện tại để xác định năm âm lịch
+          const jan1Key = `${yy}0101`;
+          if (lunarCalendarMap && lunarCalendarMap[jan1Key]) {
+            const jan1Lunar = lunarCalendarMap[jan1Key].split('/').map(Number);
+            // Nếu ngày 1/1 có tháng âm lịch >= 11, thì năm âm lịch là năm trước
+            if (jan1Lunar[1] >= 11) {
+              lunarYear = yy - 1;
+            }
+          } else {
+            // Nếu không tìm thấy, giả định năm âm lịch = năm dương lịch - 1
+            lunarYear = yy - 1;
+          }
         }
+        
+        return { day: lunarDay, month: lunarMonth, year: lunarYear };
       }
       
-      if (lunarMonth > 12) {
-        lunarMonth = lunarMonth - 12;
-      }
-      
-      if (lunarMonth >= 11 && diff < 4) {
-        lunarYear -= 1;
-      }
-      
-      // Đảm bảo ngày và tháng hợp lệ
-      const validDay = Math.max(1, Math.min(30, lunarDay));
-      const validMonth = Math.max(1, Math.min(12, lunarMonth));
-      
-      return { day: validDay, month: validMonth, year: lunarYear };
+      // Fallback: nếu không tìm thấy trong map
+      console.warn(`Không tìm thấy ngày âm lịch cho ${dateKey} trong map. Map có ${lunarCalendarMap ? Object.keys(lunarCalendarMap).length : 0} entries`);
+      console.log(`Sample keys in map:`, lunarCalendarMap ? Object.keys(lunarCalendarMap).slice(0, 5) : 'null');
+      // Trả về giá trị mặc định
+      return { day: 1, month: 1, year: yy };
     }
 
     // Helper function để lấy thời gian hiện tại theo múi giờ Việt Nam
@@ -866,7 +910,7 @@
     }
 
     // Cập nhật thời gian hiện tại
-    function updateCurrentTime() {
+    async function updateCurrentTime() {
       // Lấy thời gian hiện tại theo múi giờ Việt Nam (GMT+7)
       const vnTime = getVietnamTime();
       
@@ -875,7 +919,7 @@
       document.getElementById('current-solar-date').textContent = solarDateTimeStr;
 
       // Tính ngày âm lịch hiện tại
-      const lunarDate = solarToLunar(vnTime.date);
+      const lunarDate = await solarToLunar(vnTime.date);
       
       document.getElementById('current-lunar-date').textContent = 
         `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
@@ -887,7 +931,7 @@
     }
 
     // Tìm ngày giỗ tiếp theo
-    function findNextAnniversary() {
+    async function findNextAnniversary() {
       try {
         // Lấy thời gian hiện tại theo múi giờ Việt Nam
         const vnTime = getVietnamTime();
@@ -905,7 +949,7 @@
           searchDate.setDate(searchDate.getDate() + 1);
           
           // Chuyển đổi sang âm lịch
-          const lunarDate = solarToLunar(searchDate);
+          const lunarDate = await solarToLunar(searchDate);
           
           // Kiểm tra xem có trùng với ngày giỗ nào không
           for (const person of gioList) {
@@ -981,14 +1025,14 @@
     }
 
     // Cập nhật đồng hồ đếm ngược
-    function updateCountdown() {
+    async function updateCountdown() {
       try {
         // Lấy thời gian hiện tại theo múi giờ Việt Nam
         const vnTime = getVietnamTime();
         const vietnamNow = vnTime.date;
         
         // Tìm ngày giỗ tiếp theo
-        const result = findNextAnniversary();
+        const result = await findNextAnniversary();
         
         if (result) {
           // Tính khoảng cách thời gian
@@ -1222,7 +1266,7 @@
     }
 
     // Khởi tạo trang và cập nhật mỗi giây
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       // Thêm nút thêm mới (bị thiếu trong HTML)
       const cardTitle = document.querySelector('.card-title');
       if (!document.getElementById('addPersonBtn')) {
@@ -1233,6 +1277,10 @@
         addButton.style.display = 'none';
         cardTitle.insertBefore(addButton, cardTitle.querySelector('.auth-status'));
       }
+      
+      // Tải lịch âm dương cho năm hiện tại
+      const vnTime = getVietnamTime();
+      await loadLunarCalendar(vnTime.year);
       
       // Cập nhật trạng thái đăng nhập
       updateAuthStatus();
@@ -1286,3 +1334,4 @@
   </script>
 </body>
 </html>
+
