@@ -790,7 +790,7 @@
         b11 = getLunarMonth11(yy + 1, timeZone);
       }
       
-      const lunarDay = dayNumber - monthStart + 1;
+      const lunarDay = Math.max(1, dayNumber - monthStart + 1);
       const diff = Math.floor((monthStart - a11) / 29);
       const lunarLeap = 0;
       let lunarMonth = diff + 11;
@@ -810,16 +810,18 @@
         lunarYear -= 1;
       }
       
-      return { day: lunarDay, month: lunarMonth, year: lunarYear };
+      // Đảm bảo ngày và tháng hợp lệ
+      const validDay = Math.max(1, Math.min(30, lunarDay));
+      const validMonth = Math.max(1, Math.min(12, lunarMonth));
+      
+      return { day: validDay, month: validMonth, year: lunarYear };
     }
 
-    // Cập nhật thời gian hiện tại
-    function updateCurrentTime() {
+    // Helper function để lấy thời gian hiện tại theo múi giờ Việt Nam
+    function getVietnamTime() {
       const now = new Date();
-      const vietnamNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
-      
-      // Cập nhật thời gian dương lịch
-      const solarDateTimeStr = vietnamNow.toLocaleString('vi-VN', {
+      const formatter = new Intl.DateTimeFormat('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -828,16 +830,50 @@
         second: '2-digit',
         hour12: false
       });
+      
+      const parts = formatter.formatToParts(now);
+      const day = parseInt(parts.find(p => p.type === 'day').value);
+      const month = parseInt(parts.find(p => p.type === 'month').value);
+      const year = parseInt(parts.find(p => p.type === 'year').value);
+      const hour = parseInt(parts.find(p => p.type === 'hour').value);
+      const minute = parseInt(parts.find(p => p.type === 'minute').value);
+      const second = parseInt(parts.find(p => p.type === 'second').value);
+      
+      // Tạo Date object từ UTC với offset +7 giờ (múi giờ Việt Nam)
+      // Các giá trị đã lấy được là thời gian Việt Nam, nên cần chuyển về UTC
+      // UTC = Việt Nam - 7 giờ
+      const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+      // Trừ đi 7 giờ để có UTC time tương ứng với thời gian Việt Nam
+      const vietnamTime = new Date(utcDate.getTime() - (7 * 60 * 60 * 1000));
+      
+      return {
+        date: vietnamTime,
+        day: day,
+        month: month,
+        year: year,
+        hour: hour,
+        minute: minute,
+        second: second
+      };
+    }
+
+    // Cập nhật thời gian hiện tại
+    function updateCurrentTime() {
+      // Lấy thời gian hiện tại theo múi giờ Việt Nam (GMT+7)
+      const vnTime = getVietnamTime();
+      
+      // Tạo chuỗi hiển thị
+      const solarDateTimeStr = `${String(vnTime.day).padStart(2, '0')}/${String(vnTime.month).padStart(2, '0')}/${vnTime.year} ${String(vnTime.hour).padStart(2, '0')}:${String(vnTime.minute).padStart(2, '0')}:${String(vnTime.second).padStart(2, '0')}`;
       document.getElementById('current-solar-date').textContent = solarDateTimeStr;
 
       // Tính ngày âm lịch hiện tại
-      const lunarDate = solarToLunar(vietnamNow);
+      const lunarDate = solarToLunar(vnTime.date);
       
       document.getElementById('current-lunar-date').textContent = 
         `${lunarDate.day}/${lunarDate.month}/${lunarDate.year}`;
 
       return {
-        solar: vietnamNow,
+        solar: vnTime.date,
         lunar: lunarDate
       };
     }
@@ -845,14 +881,15 @@
     // Tìm ngày giỗ tiếp theo
     function findNextAnniversary() {
       try {
-        const now = new Date();
-        const currentLunar = solarToLunar(now);
+        // Lấy thời gian hiện tại theo múi giờ Việt Nam
+        const vnTime = getVietnamTime();
+        const vietnamNow = vnTime.date;
         
         let nearestDate = null;
         let minDiff = Infinity;
         
         // Tạo một bản sao của ngày hiện tại để tìm kiếm
-        const searchDate = new Date(now);
+        const searchDate = new Date(vietnamNow);
         
         // Tìm kiếm trong khoảng 400 ngày tới (hơn 1 năm)
         for (let i = 0; i < 400; i++) {
@@ -868,7 +905,7 @@
             
             if (lunarDate.day === lunarDay && lunarDate.month === lunarMonth) {
               // Tính khoảng cách thời gian
-              const diff = searchDate.getTime() - now.getTime();
+              const diff = searchDate.getTime() - vietnamNow.getTime();
               
               // Nếu là ngày gần nhất
               if (diff < minDiff && diff > 0) {
@@ -938,14 +975,16 @@
     // Cập nhật đồng hồ đếm ngược
     function updateCountdown() {
       try {
-        const now = new Date();
+        // Lấy thời gian hiện tại theo múi giờ Việt Nam
+        const vnTime = getVietnamTime();
+        const vietnamNow = vnTime.date;
         
         // Tìm ngày giỗ tiếp theo
         const result = findNextAnniversary();
         
         if (result) {
           // Tính khoảng cách thời gian
-          const diff = result.date.getTime() - now.getTime();
+          const diff = result.date.getTime() - vietnamNow.getTime();
           
           // Tính toán số ngày còn lại
           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -957,12 +996,14 @@
           document.getElementById('next-person').textContent = result.person.name;
           document.getElementById('next-relation').textContent = result.person.relation;
           
-          // Định dạng ngày dương lịch
-          const solarDateStr = result.date.toLocaleString('vi-VN', {
+          // Định dạng ngày dương lịch theo múi giờ Việt Nam
+          const dateFormatter = new Intl.DateTimeFormat('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
           });
+          const solarDateStr = dateFormatter.format(result.date);
           document.getElementById('next-solar-date').textContent = solarDateStr;
           
           // Hiển thị ngày âm lịch
