@@ -767,9 +767,19 @@
       }
       
       // Hàm chuyển đổi dương lịch sang âm lịch
-      const dd = solarDate.getDate();
-      const mm = solarDate.getMonth() + 1;
-      const yy = solarDate.getFullYear();
+      // Lấy ngày, tháng, năm từ Date object theo múi giờ Việt Nam
+      // Sử dụng Intl.DateTimeFormat để đảm bảo lấy đúng ngày theo múi giờ Việt Nam
+      const formatter = new Intl.DateTimeFormat('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric'
+      });
+      
+      const parts = formatter.formatToParts(solarDate);
+      const dd = parseInt(parts.find(p => p.type === 'day').value);
+      const mm = parseInt(parts.find(p => p.type === 'month').value);
+      const yy = parseInt(parts.find(p => p.type === 'year').value);
       
       const timeZone = 7.0; // Múi giờ Việt Nam (GMT+7)
       const dayNumber = jdFromDate(dd, mm, yy);
@@ -839,12 +849,10 @@
       const minute = parseInt(parts.find(p => p.type === 'minute').value);
       const second = parseInt(parts.find(p => p.type === 'second').value);
       
-      // Tạo Date object từ UTC với offset +7 giờ (múi giờ Việt Nam)
-      // Các giá trị đã lấy được là thời gian Việt Nam, nên cần chuyển về UTC
-      // UTC = Việt Nam - 7 giờ
-      const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
-      // Trừ đi 7 giờ để có UTC time tương ứng với thời gian Việt Nam
-      const vietnamTime = new Date(utcDate.getTime() - (7 * 60 * 60 * 1000));
+      // Tạo Date object từ string với timezone offset +07:00 (múi giờ Việt Nam)
+      // Format: YYYY-MM-DDTHH:mm:ss+07:00
+      const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}+07:00`;
+      const vietnamTime = new Date(dateString);
       
       return {
         date: vietnamTime,
